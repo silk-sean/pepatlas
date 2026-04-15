@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { SITE_URL } from "@/lib/constants";
+import { sendMail, replyNotificationEmail } from "@/lib/email";
 
 interface Params {
   params: Promise<{ threadId: string }>;
@@ -69,5 +71,66 @@ export async function POST(req: Request, ctx: Params) {
     }),
   ]);
 
+  // Fire-and-forget notifications to subscribers (non-replier)
+  notifySubscribers({
+    threadId,
+    replyBody: bodyText,
+    replierUserId: session.user.id,
+  }).catch((e) => console.error("[notify] failed:", e));
+
   return NextResponse.json({ ok: true, reply });
+}
+
+async function notifySubscribers(opts: {
+  threadId: string;
+  replyBody: string;
+  replierUserId: string;
+}) {
+  const thread = await db.thread.findUnique({
+    where: { id: opts.threadId },
+    select: {
+      id: true,
+      title: true,
+      category: { select: { slug: true } },
+    },
+  });
+  if (!thread) return;
+
+  const replier = await db.user.findUnique({
+    where: { id: opts.replierUserId },
+    select: { username: true, name: true },
+  });
+  const replierName = replier?.username || replier?.name || "Someone";
+
+  const subs = await db.threadSubscription.findMany({
+    where: {
+      threadId: opts.threadId,
+      userId: { not: opts.replierUserId },
+    },
+    include: {
+      user: { select: { email: true, username: true, name: true } },
+    },
+  });
+
+  const threadUrl = `${SITE_URL}/forum/${thread.category.slug}/${thread.id}`;
+
+  await Promise.allSettled(
+    subs.map((s) => {
+      if (!s.user?.email) return Promise.resolve();
+      const mail = replyNotificationEmail({
+        recipientName: s.user.username || s.user.name || "there",
+        threadTitle: thread.title,
+        threadUrl,
+        replyBody: opts.replyBody,
+        replierName,
+        unsubscribeUrl: `${SITE_URL}/forum/${thread.category.slug}/${thread.id}#unsubscribe`,
+      });
+      return sendMail({
+        to: s.user.email,
+        subject: mail.subject,
+        html: mail.html,
+        text: mail.text,
+      });
+    })
+  );
 }

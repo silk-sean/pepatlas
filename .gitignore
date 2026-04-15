@@ -33,6 +33,11 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# Deployment runtime (per-droplet — don't commit certs, backups, etc.)
+/backups/
+/deploy/certbot/
+/deploy/nginx-active.conf
+
 # vercel
 .vercel
 

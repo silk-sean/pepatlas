@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Produces .next/standalone — required by our Dockerfile for a slim runtime image
+  output: "standalone",
 };
 
 export default nextConfig;

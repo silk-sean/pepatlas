@@ -1,0 +1,95 @@
+---
+title: "Reading a COA: What a Certificate of Analysis Actually Tells You"
+slug: "reading-a-coa"
+category: "methods"
+tags: ["COA", "purity", "HPLC", "mass-spec", "quality", "beginner"]
+related: ["reconstitution-101", "storage-and-shelf-life", "stacking-fundamentals"]
+status: "published"
+publishedAt: "2026-03-20"
+author: "PepAtlas Editorial"
+summary: "A COA is the document that separates a vendor with a batch receipt from one with actual analytical data. Here's how to read one without getting snowed."
+heroAccent: "lime"
+pepperpediaSlug: "certificate-of-analysis"
+forumCategory: "beginner-questions"
+featured: false
+---
+
+A Certificate of Analysis (COA) is the third-party test report for a specific batch of peptide. At minimum it should tell you what's in the vial, how pure it is, and confirm the molecule is what the label says. A real COA comes from an independent lab and references a specific batch or lot number on the product.
+
+Vendors hand-wave this. "99% purity!" on a website is marketing. A COA is data. Learn to read one and you're no longer trusting a tagline.
+
+## What you need to see on a COA
+
+A legitimate COA includes:
+
+- [ ] Lab name and accreditation (ISO 17025 or equivalent is the gold standard)
+- [ ] Date of testing
+- [ ] Compound name and sequence
+- [ ] Batch or lot number (must match the number on your vial)
+- [ ] HPLC (purity) result with chromatogram attached
+- [ ] Mass spectrometry result with spectrum attached
+- [ ] Signature or electronic stamp from the analyst
+
+Missing the chromatogram or spectrum means missing the actual data. A single-page summary with "99%" typed on it is not a COA.
+
+## HPLC — what it proves
+
+HPLC (high-performance liquid chromatography) separates the compounds in a sample. The chromatogram is a series of peaks; each peak is a distinct substance.
+
+For a peptide sample:
+
+- **One large peak** = the target peptide
+- **Small peaks** around it = impurities, degradation fragments, deletion sequences
+- **Purity %** = area of the target peak divided by total area of all peaks
+
+**What's good:**
+- 98%+ is standard for modern research-grade peptides
+- 99%+ is common for premium vendors
+- <95% should give you pause; <90% is a red flag unless it's a known complex compound
+
+**What to look at on the chromatogram itself:**
+- A single dominant, symmetrical peak — good
+- A shoulder or second peak right next to the main peak — that's often a deletion sequence or oxidation product, worth asking about
+- A forest of small peaks along the baseline — degraded or poorly synthesized
+
+## Mass spec — what it proves
+
+Mass spectrometry measures the molecular weight of the compound. It confirms **identity** — that what's in the vial is actually the peptide claimed.
+
+Every peptide has a known theoretical molecular weight. A mass spec result should match that weight within a narrow tolerance (typically ±1 Da for small peptides).
+
+**Example:** BPC-157 theoretical MW is 1419.5 Da. A legitimate COA for BPC-157 should show a mass peak at ~1419.5 (or sometimes a proton-adduct peak at ~1420.5, depending on the method).
+
+If the mass on the COA doesn't match the theoretical weight of the compound, you either have the wrong molecule or a fabricated report.
+
+## Quick COA checklist
+
+| Check | Legit COA | Red flag |
+|-------|-----------|----------|
+| Lab name | Named, accredited, Google-able | Missing or "internal QC" |
+| Lot number | Matches vial | Missing or generic |
+| HPLC chromatogram | Full chart included | Just a "%" number |
+| Mass spec spectrum | Full spectrum included | Just a "MW matches" line |
+| Test date | Recent, within batch life | Old, or blank |
+| Signed by analyst | Yes | No |
+| PDF metadata | Created near test date | Created days before you asked about it |
+
+## What a COA doesn't tell you
+
+- **Sterility.** HPLC and mass spec don't test for bacteria or endotoxin. A peptide can be 99% pure and still contaminated.
+- **Shelf life remaining.** A COA is a snapshot from when the batch was made. If it's two years old, storage matters more than the original number.
+- **What's in *your* vial specifically.** The COA is for the lot. Poor handling between lab and you can degrade the vial you hold.
+
+## Common mistakes
+
+- **Trusting an image of a COA without checking the lab.** Google the lab name. If they don't exist or don't respond to contact requests, the COA might be fabricated.
+- **Reading only the purity %.** A 99% mark without a chromatogram is marketing, not data.
+- **Ignoring lot mismatch.** If your vial says "Lot 2024-117" and the COA says "Lot 2023-042," that COA doesn't apply to your product.
+- **Assuming a COA from one batch covers everything the vendor ships.** Reputable vendors issue a COA per batch. Using a single decade-old COA across all their compounds is lazy at best, misleading at worst.
+- **Not saving COAs.** Screenshot or PDF the COA for every order. If something goes wrong, you'll want the documentation.
+
+## Where to go next
+
+- Compound-specific purity norms and molecular weights: [Pepperpedia](https://pepperpedia.net).
+- Storage basics that affect real-world quality: [storage and shelf life](/articles/methods/storage-and-shelf-life).
+- Vendor and COA discussions: [Beginner Questions forum](https://pepatlas.com/forum/beginner-questions).

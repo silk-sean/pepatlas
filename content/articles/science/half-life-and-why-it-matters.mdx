@@ -1,0 +1,98 @@
+---
+title: "Half-Life and Why It Matters"
+slug: "half-life-and-why-it-matters"
+category: "science"
+tags: ["science", "mechanism"]
+related: ["peptide-pharmacokinetics-basics", "how-peptides-signal", "reconstitution-101"]
+status: "published"
+publishedAt: "2026-03-16"
+author: "PepAtlas Editorial"
+summary: "Half-life is the single most important number for figuring out how often to dose a peptide. Here's what it actually means and how it varies across the classes people use."
+heroAccent: "purple"
+pepperpediaSlug: "half-life"
+forumCategory: "optimization"
+featured: false
+---
+
+Two peptides that act on the exact same receptor can have completely different dosing schedules. One requires a shot three times a day. The other works once a week. The difference isn't potency — it's **half-life**.
+
+If you understand half-life, most of the weirdness of peptide protocols suddenly makes sense: why CJC-1295 comes in two versions, why sermorelin has to go in right before bed, why Ozempic is weekly and exenatide is twice daily.
+
+## What half-life actually is
+
+Half-life is the time it takes for the amount of a compound in your blood to drop by half. That's it.
+
+If a peptide has a 4-hour half-life and you inject a dose that peaks at 100 units/mL:
+
+| Time after injection | Concentration |
+|----------------------|---------------|
+| 0 hours              | 100           |
+| 4 hours              | 50            |
+| 8 hours              | 25            |
+| 12 hours             | 12.5          |
+| 16 hours             | 6.25          |
+| 20 hours             | 3.1           |
+
+After about five half-lives (roughly 20 hours here), the compound is essentially gone. This five-half-lives rule of thumb is useful — it's when clinicians consider a drug "washed out."
+
+The important word is **half**. Elimination isn't linear. Your body removes a constant *fraction* of what's there, not a constant amount. Big doses fall fast at first, then slower and slower.
+
+## Why half-life dictates dosing
+
+If you want a peptide to have a sustained effect, you need to keep its concentration above the threshold where it does something useful. You top the tank up before it drops too far.
+
+- **Very short half-life (under 30 minutes)**: pulse dosing or multiple daily shots. Continuous effect is basically impossible without an infusion.
+- **Short (1–6 hours)**: typically 1–3 times daily.
+- **Moderate (12–48 hours)**: once daily.
+- **Long (several days)**: weekly or less.
+
+This is why identical peptides with small structural changes can have wildly different protocols. **Sermorelin** has a ~15-minute half-life and dies fast. Clip on an albumin-binding handle and you get **CJC-1295 with DAC** — same receptor, but a 6–8 day half-life, so a weekly shot covers it.
+
+## How the body kills a peptide
+
+Peptides are made of amino acids, and your body has enzymes (**proteases**) whose entire job is to chew up amino acid chains. Every time blood flows through your liver and kidneys, some of the circulating peptide gets chopped into inactive fragments. Some peptides are chewed up in the blood itself. GLP-1, the hormone that semaglutide mimics, has a natural half-life of about **two minutes** because it's so vulnerable to a plasma enzyme called DPP-IV.
+
+To extend half-life, chemists modify peptides to be either harder to chew or bigger to filter:
+
+- **Swapping amino acids** with protease-resistant versions (D-amino acids, unusual residues)
+- **Cyclization** — forming a loop so enzymes can't get a grip on the ends
+- **Fatty acid tails** that let the peptide piggyback on serum albumin, a huge protein that sticks around for weeks
+- **PEGylation** — attaching a polymer chain that makes the peptide too big for the kidneys to filter out
+
+Semaglutide is GLP-1 with a fatty-acid tail. That single change takes a 2-minute molecule and turns it into a 7-day one.
+
+## Half-lives of common classes
+
+These are rough figures — routes of administration, individual metabolism, and study methodology all move the numbers around.
+
+| Class / peptide                           | Approximate half-life | Typical dosing      |
+|-------------------------------------------|-----------------------|---------------------|
+| Sermorelin                                | ~15 minutes           | Nightly             |
+| GHRP-2, GHRP-6, ipamorelin                | 15–120 minutes        | 1–3× daily          |
+| CJC-1295 (no DAC)                         | ~30 minutes           | 1–3× daily          |
+| BPC-157                                   | ~4 hours              | 1–2× daily          |
+| PT-141                                    | ~2.7 hours            | As-needed           |
+| Tesamorelin                               | ~26 minutes (plasma)  | Daily               |
+| CJC-1295 with DAC                         | 6–8 days              | Weekly              |
+| Liraglutide                               | ~13 hours             | Daily               |
+| Semaglutide                               | ~7 days               | Weekly              |
+| Tirzepatide                               | ~5 days               | Weekly              |
+| Retatrutide                               | ~6 days               | Weekly              |
+
+Notice how the GLP-1 class ranges from 13 hours to a week despite all hitting the same receptor. Same pharmacology, different chassis.
+
+## Practical implications
+
+**Timing the shot.** Short-half-life GH peptides are typically dosed right before bed so their window aligns with your natural nighttime GH pulse. Injecting sermorelin at noon doesn't do much — the somatostatin tone is too high during the day to allow a meaningful pulse even with a push.
+
+**Steady state.** When you dose regularly, blood levels rise until input equals output. This equilibrium — steady state — is reached after about 4–5 half-lives of consistent dosing. For weekly semaglutide, that's 4–5 weeks. This is exactly why titration schedules exist: side effects are usually worst during the climb, not at the plateau.
+
+**Splitting doses.** A peptide with a 2-hour half-life dosed once in the morning will be essentially absent by afternoon. Two smaller doses 8 hours apart often produce a better average blood level than one big one.
+
+**Washout.** Cycling off a weekly peptide means thinking in weeks, not days. Semaglutide is still meaningfully present 3–4 weeks after the last dose.
+
+## Where to go next
+
+- [Peptide Pharmacokinetics Basics](/articles/science/peptide-pharmacokinetics-basics) covers the broader picture — absorption, distribution, metabolism, elimination.
+- The Pepperpedia entry on [half-life](https://pepperpedia.net/glossary/half-life) has a fuller table and talks about half-life extension chemistry in more depth.
+- For practical storage and prep advice, [Reconstitution 101](/articles/methods/reconstitution-101) covers what happens between your vial and your syringe.

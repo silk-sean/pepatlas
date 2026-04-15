@@ -1,0 +1,114 @@
+---
+title: "Peptide Pharmacokinetics Basics"
+slug: "peptide-pharmacokinetics-basics"
+category: "science"
+tags: ["science", "mechanism"]
+related: ["half-life-and-why-it-matters", "why-peptides-degrade", "reconstitution-101"]
+status: "published"
+publishedAt: "2026-03-24"
+author: "PepAtlas Editorial"
+summary: "Absorption, distribution, metabolism, elimination — the journey a peptide takes from your syringe to the receptor, and why it shapes almost every practical decision."
+heroAccent: "purple"
+forumCategory: "optimization"
+featured: false
+---
+
+A peptide's biology is interesting, but the reason most of them require an injection, the reason half-lives range from minutes to weeks, and the reason oral peptides are rare — those are all pharmacokinetics questions. Pharmacokinetics is the study of what your body does **to** a drug, as opposed to pharmacodynamics, which is what the drug does to your body.
+
+For peptides, PK is the harder problem. The receptor part usually works. The *getting there* part is where everything breaks.
+
+## The four-stage journey: ADME
+
+Every drug, peptide or otherwise, goes through four stages from dose to disposal. The acronym is **ADME**:
+
+- **A**bsorption: getting from the injection (or pill, or nasal spray) into the bloodstream
+- **D**istribution: being carried to tissues throughout the body
+- **M**etabolism: being chemically broken down, mostly in liver and kidneys
+- **E**limination: being removed, typically in urine or bile
+
+Small-molecule drugs, like ibuprofen, can survive the whole chain after being swallowed. Peptides usually can't. Understanding why tells you everything about how they're delivered.
+
+## Absorption: why sub-Q is the default
+
+A peptide has to get from somewhere into your blood. The route you pick has enormous consequences.
+
+**Oral**: you swallow it. This almost never works for peptides. Your stomach contains hydrochloric acid at pH 1–2 and a protease called pepsin whose entire job is to chop protein chains into fragments. Whatever survives the stomach meets more proteases in the small intestine. Whatever survives *that* has to cross the gut wall — a problem, because peptides are too big and charged to pass through passively. And finally, whatever makes it into the portal blood goes straight to the liver, which aggressively metabolizes foreign peptides (the "first-pass effect"). Most peptides have oral bioavailability under 1%. A rare few (BPC-157 being the famous example) appear to retain some activity orally — nobody fully understands why.
+
+**Subcutaneous (sub-Q)**: you inject it into the layer of fat just under your skin. This is the workhorse route. The peptide sits in a small depot in adipose tissue and slowly diffuses into local capillaries over minutes to hours. The slow absorption is actually useful — it extends the functional duration compared to an IV push of the same dose. Bioavailability is typically 60–90%.
+
+**Intramuscular (IM)**: into the muscle. Faster absorption than sub-Q because muscle is more vascular. Used for some hormones and vaccines. Painful for daily use.
+
+**Intravenous (IV)**: straight into the vein. 100% bioavailability by definition — you're skipping absorption entirely. The problem is duration: whatever half-life the peptide has starts counting the second it hits your blood. IV is essentially never used in community peptide protocols.
+
+**Intranasal**: absorbed through the mucous membrane in your nose. The tissue is thin and well-vascularized. It's effective for small peptides that can cross the blood-brain barrier easily — semax and selank use this route. Bioavailability is typically 10–30%, but the advantage is that some of the dose reaches the brain directly through the olfactory pathway, bypassing the blood-brain barrier.
+
+**Transdermal**: through the skin. Mostly not viable for peptides — they're too big to cross intact skin. Some topical formulations (GHK-Cu in skincare) work because the peptide acts locally at the skin itself, not systemically.
+
+The short version: for injectable peptides, sub-Q is standard because it balances bioavailability, duration, and tolerability.
+
+## Distribution: where the peptide goes
+
+Once in the blood, the peptide has to reach its target receptors. Several things affect distribution:
+
+- **Blood flow**: well-perfused organs (liver, kidneys, brain) see the peptide first and most. Poorly-perfused tissues (fat, tendon, cartilage) see it later and less.
+- **Protein binding**: many peptides stick to serum albumin, which acts as a carrier. This is the *deliberate* feature of fatty-acid-modified peptides like semaglutide — they bind albumin so tightly that they're carried for days.
+- **The blood-brain barrier**: a tight filter between blood and brain tissue. Most peptides can't cross. Intranasal delivery is one workaround; small lipophilic fragments (selank, semax) are another.
+- **Molecular size**: smaller peptides distribute faster but also get filtered by the kidneys faster. Larger peptides stay in circulation longer but penetrate tissues less.
+
+Pharmacologists quantify distribution with a parameter called **volume of distribution (Vd)**. A small Vd means the peptide stays in the blood; a large Vd means it's extensively taken up by tissues. Most peptides are somewhere in between.
+
+## Metabolism: the chewing apart
+
+Here's where peptides differ most from conventional drugs. Small-molecule drugs mostly get metabolized by a set of liver enzymes called cytochrome P450s. Peptides are metabolized by **proteases** — enzymes that break peptide bonds — and proteases are everywhere.
+
+Key sites:
+
+- **Plasma**: circulating proteases including DPP-IV (which kills GLP-1) and various aminopeptidases
+- **Liver**: hepatocytes and resident macrophages take up and degrade circulating peptides
+- **Kidneys**: peptides small enough to filter get broken down in the tubules and their amino acids reabsorbed
+- **Target tissues**: some peptides are chewed up right at the receptor, which limits local duration
+
+The products of peptide metabolism are mostly just free amino acids, which your body recycles into its general amino acid pool. A peptide isn't "excreted" in the same way caffeine is — most of it is digested back into parts.
+
+This is why every half-life-extension trick for peptides (PEGylation, fatty acid tails, D-amino acid substitution, cyclization) targets protease resistance. Either you shield the vulnerable bonds, or you make the peptide too large to be filtered before it can work.
+
+## Elimination: out the kidneys (mostly)
+
+What little isn't metabolized back into amino acids leaves the body through:
+
+- **Kidneys**: small peptides (under about 5 kDa) are filtered by the glomerulus. This is why kidney function matters for peptide dosing in older patients.
+- **Bile**: larger peptides and protein fragments are sometimes routed through the liver into bile, then out through the gut.
+- **Recycling**: amino acid fragments are reabsorbed and reused in the body's general protein economy.
+
+## The handful of numbers that matter in practice
+
+You'll see these parameters repeated in any PK discussion:
+
+| Parameter       | What it means                              | Why you care                                      |
+|-----------------|--------------------------------------------|---------------------------------------------------|
+| **Cmax**        | Peak concentration                          | How "hard" the dose hits                          |
+| **Tmax**        | Time to peak                                | When the effect is strongest                      |
+| **AUC**         | Total exposure over time                    | Total drug-hours your body saw                    |
+| **t½**          | Half-life                                   | How often to redose                               |
+| **Bioavailability (F)** | Fraction that reaches circulation    | Why oral peptides are usually pointless           |
+| **Vd**          | Volume of distribution                      | Whether it stays in blood or reaches tissues      |
+| **Clearance**   | Rate of elimination                         | How fast it leaves                                |
+
+A peptide's pharmacokinetic profile is a compact summary of all four ADME stages. "Half-life ~7 days, sub-Q bioavailability ~89%, steady state by 5 weeks" tells you almost everything you need to know about how to dose semaglutide.
+
+## Practical implications
+
+**Why peptides come in vials, not pills.** Almost no peptide survives oral delivery. The exceptions are rare and usually incomplete (BPC-157, KPV).
+
+**Why sub-Q is universal.** The combination of high bioavailability, slow absorption depot, and low pain makes it the practical sweet spot.
+
+**Why you can't just take more of a short-acting peptide less often.** More of a 30-minute peptide produces a bigger peak and the same short duration. You can't stretch it by raising the dose — you need a chemical change to the molecule itself.
+
+**Why the long-acting ones have huge safety margins in one direction and risk in the other.** A drug with a 7-day half-life takes 5+ weeks to reach steady state, and 4–5 weeks to wash out. Side effects are slow to build and slow to resolve.
+
+## Where to go next
+
+- For the specific topic of degradation, [Why Peptides Degrade and How to Prevent It](/articles/science/why-peptides-degrade).
+- For how half-life determines dosing frequency, [Half-Life and Why It Matters](/articles/science/half-life-and-why-it-matters).
+- The Pepperpedia entries on [pharmacokinetics](https://pepperpedia.net/glossary/pharmacokinetics) and [bioavailability](https://pepperpedia.net/glossary/bioavailability) have the full technical reference.
+- For what happens between the vial and the syringe, [Reconstitution 101](/articles/methods/reconstitution-101).

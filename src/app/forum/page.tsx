@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PartnerSidebar } from "@/components/shared/PartnerSidebar";
+import { ForumSearchBar } from "@/components/forum/ForumSearchBar";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -42,7 +43,7 @@ export default async function ForumPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex gap-10">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
             <div>
               <h1 className="text-3xl font-bold text-white">Forums</h1>
               <p className="mt-2 text-gray-400">
@@ -55,6 +56,9 @@ export default async function ForumPage() {
             >
               New Thread
             </Link>
+          </div>
+          <div className="mb-8 max-w-md">
+            <ForumSearchBar />
           </div>
 
           <div className="space-y-4">

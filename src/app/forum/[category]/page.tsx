@@ -5,6 +5,7 @@ import { SITE_URL } from "@/lib/constants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PartnerSidebar } from "@/components/shared/PartnerSidebar";
 import { ThreadRow } from "@/components/forum/ThreadRow";
+import { ForumSearchBar } from "@/components/forum/ForumSearchBar";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -91,6 +92,9 @@ export default async function ForumCategoryPage({ params }: CategoryPageProps) {
             >
               New Thread
             </Link>
+          </div>
+          <div className="mb-6 max-w-md">
+            <ForumSearchBar />
           </div>
 
           {cat.children.length > 0 && (

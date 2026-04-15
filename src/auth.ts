@@ -7,17 +7,20 @@ import { db } from "@/lib/db";
 
 const providers: NextAuthConfig["providers"] = [
   Credentials({
-    name: "Email",
+    name: "Credentials",
     credentials: {
-      email: { label: "Email", type: "email" },
+      identifier: { label: "Email or Username", type: "text" },
       password: { label: "Password", type: "password" },
     },
     async authorize(credentials) {
-      const email = String(credentials?.email || "").toLowerCase().trim();
+      const identifier = String(credentials?.identifier || "").trim();
       const password = String(credentials?.password || "");
-      if (!email || !password) return null;
+      if (!identifier || !password) return null;
 
-      const user = await db.user.findUnique({ where: { email } });
+      const isEmail = identifier.includes("@");
+      const user = isEmail
+        ? await db.user.findUnique({ where: { email: identifier.toLowerCase() } })
+        : await db.user.findUnique({ where: { username: identifier } });
       if (!user || !user.passwordHash) return null;
 
       const ok = await bcrypt.compare(password, user.passwordHash);

@@ -12,7 +12,7 @@ export function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/forum";
 
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -23,12 +23,12 @@ export function LoginForm() {
     setLoading(true);
     try {
       const result = await signIn("credentials", {
-        email,
+        identifier,
         password,
         redirect: false,
       });
       if (result?.error) {
-        setError("Invalid email or password");
+        setError("Invalid credentials");
         return;
       }
       router.push(callbackUrl);
@@ -43,16 +43,16 @@ export function LoginForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="identifier">Email or Username</Label>
         <Input
-          id="email"
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
+          id="identifier"
+          type="text"
+          value={identifier}
+          onChange={(e) => setIdentifier(e.target.value)}
+          placeholder="you@example.com or username"
           className="mt-1"
           required
-          autoComplete="email"
+          autoComplete="username"
         />
       </div>
       <div>

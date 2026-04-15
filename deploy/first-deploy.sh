@@ -22,9 +22,22 @@ until docker compose exec -T postgres pg_isready -U pepatlas >/dev/null 2>&1; do
 done
 
 echo "=== 3/5: Pushing Prisma schema + seeding categories ==="
-docker compose exec -T app node -e "console.log('app up')"
-docker compose exec -T app npx prisma db push --skip-generate
-docker compose exec -T app npx tsx prisma/seed.ts || true
+# Run prisma db push from the app container (it has node_modules + schema)
+docker compose exec -T app npx prisma db push
+# Seed categories via raw SQL (tsx isn't in the production image)
+docker compose exec -T postgres psql -U pepatlas -d pepatlas <<'SQL'
+INSERT INTO "ForumCategory" (id, slug, name, description, "sortOrder") VALUES
+  ('cat-beginner', 'beginner-questions', 'Beginner Questions', 'New to peptides? Start here.', 0),
+  ('cat-protocols', 'protocol-discussions', 'Protocol Discussions', 'Share and discuss protocols.', 1),
+  ('cat-logs', 'personal-logs', 'Personal Logs & Journals', 'Track your journey.', 2),
+  ('cat-bloodwork', 'bloodwork-metrics', 'Bloodwork & Metrics', 'Lab results and biomarkers.', 3),
+  ('cat-optimization', 'optimization', 'Optimization Strategies', 'Advanced wellness strategies.', 4),
+  ('cat-general', 'general', 'General Discussion', 'Off-topic and community chat.', 5)
+ON CONFLICT (slug) DO UPDATE SET
+  name = EXCLUDED.name,
+  description = EXCLUDED.description,
+  "sortOrder" = EXCLUDED."sortOrder";
+SQL
 
 echo "=== 4/5: Starting HTTP-only nginx and issuing SSL cert ==="
 docker compose up -d nginx

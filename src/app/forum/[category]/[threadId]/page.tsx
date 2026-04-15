@@ -6,6 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { ReplyForm } from "@/components/forum/ReplyForm";
+import { Reactions } from "@/components/forum/Reactions";
+import { buildReactionCounts } from "@/lib/reactions";
+import { rankFor } from "@/lib/ranks";
 
 export const dynamic = "force-dynamic";
 
@@ -40,26 +43,33 @@ export default async function ThreadDetailPage({ params }: ThreadPageProps) {
   const thread = await db.thread.findUnique({
     where: { id: threadId },
     include: {
-      author: { select: { username: true, name: true, image: true } },
+      author: { select: { id: true, username: true, name: true, image: true, postCount: true, createdAt: true } },
+      reactions: { select: { type: true, userId: true } },
       replies: {
         orderBy: { createdAt: "asc" },
-        include: { author: { select: { username: true, name: true, image: true } } },
+        include: {
+          author: { select: { id: true, username: true, name: true, image: true, postCount: true, createdAt: true } },
+          reactions: { select: { type: true, userId: true } },
+        },
       },
     },
   });
   if (!thread) notFound();
 
-  // Increment views (fire and forget — don't block render)
+  // Fire-and-forget view increment
   db.thread.update({ where: { id: threadId }, data: { views: { increment: 1 } } }).catch(() => {});
 
   const session = await auth();
+  const viewerId = session?.user?.id;
+
+  const threadReactions = buildReactionCounts(thread.reactions, viewerId);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <nav className="text-sm text-gray-500 mb-4">
-        <Link href="/forum" className="hover:text-gray-900">Forums</Link>
+        <Link href="/forum" className="hover:text-gray-300">Forums</Link>
         {" / "}
-        <Link href={`/forum/${category}`} className="hover:text-gray-900">{cat.name}</Link>
+        <Link href={`/forum/${category}`} className="hover:text-gray-300">{cat.name}</Link>
       </nav>
 
       <Card className="mb-6">
@@ -73,44 +83,42 @@ export default async function ThreadDetailPage({ params }: ThreadPageProps) {
             )}
           </div>
           <CardTitle className="text-2xl">{thread.title}</CardTitle>
-          <div className="text-sm text-gray-500 flex items-center gap-3 flex-wrap mt-1">
-            <span>by <span className="text-gray-300">{thread.author.username || thread.author.name}</span></span>
-            <span>•</span>
-            <span>{formatRelative(thread.createdAt)}</span>
-            <span>•</span>
-            <span>{thread.views} views</span>
-          </div>
         </CardHeader>
         <CardContent>
-          <div className="whitespace-pre-wrap text-[15px] leading-relaxed">
-            {thread.body}
-          </div>
+          <PostBody
+            author={thread.author}
+            body={thread.body}
+            createdAt={thread.createdAt}
+            views={thread.views}
+          />
+          <Reactions
+            threadId={thread.id}
+            initial={threadReactions}
+            isAuthed={!!viewerId}
+          />
         </CardContent>
       </Card>
 
       <h2 className="text-sm uppercase tracking-wider text-gray-500 font-semibold mb-3">
-        {thread.replies.length} {thread.replies.length === 1 ? "Reply" : "Replies"}
+        {thread.replyCount} {thread.replyCount === 1 ? "Reply" : "Replies"}
       </h2>
 
       <div className="space-y-3 mb-8">
         {thread.replies.map((r) => (
           <Card key={r.id}>
             <CardContent className="py-4">
-              <div className="flex items-start gap-3">
-                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 shrink-0 flex items-center justify-center text-white font-bold text-xs">
-                  {(r.author.username || r.author.name || "?")[0]?.toUpperCase()}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm text-gray-500 mb-1">
-                    <span className="text-gray-300 font-medium">{r.author.username || r.author.name}</span>
-                    <span className="mx-2">•</span>
-                    <span>{formatRelative(r.createdAt)}</span>
-                  </div>
-                  <div className="whitespace-pre-wrap text-[14px] leading-relaxed">
-                    {r.body}
-                  </div>
-                </div>
-              </div>
+              <PostBody
+                author={r.author}
+                body={r.body}
+                createdAt={r.createdAt}
+                editedAt={r.editedAt}
+                compact
+              />
+              <Reactions
+                replyId={r.id}
+                initial={buildReactionCounts(r.reactions, viewerId)}
+                isAuthed={!!viewerId}
+              />
             </CardContent>
           </Card>
         ))}
@@ -133,6 +141,70 @@ export default async function ThreadDetailPage({ params }: ThreadPageProps) {
           </CardContent>
         </Card>
       )}
+    </div>
+  );
+}
+
+interface AuthorMeta {
+  id: string;
+  username: string | null;
+  name: string | null;
+  image: string | null;
+  postCount: number;
+  createdAt: Date;
+}
+
+function PostBody({
+  author,
+  body,
+  createdAt,
+  editedAt,
+  views,
+  compact,
+}: {
+  author: AuthorMeta;
+  body: string;
+  createdAt: Date;
+  editedAt?: Date | null;
+  views?: number;
+  compact?: boolean;
+}) {
+  const rank = rankFor(author.postCount);
+  const joinYear = author.createdAt.getFullYear();
+  const display = author.username || author.name || "unknown";
+  const avatarSize = compact ? "h-10 w-10 text-xs" : "h-12 w-12 text-sm";
+  return (
+    <div className="flex items-start gap-3 sm:gap-4">
+      <div className="shrink-0 flex flex-col items-center">
+        <Link
+          href={author.username ? `/profile/${author.username}` : "#"}
+          className={`${avatarSize} rounded-full bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center text-white font-bold`}
+        >
+          {display[0]?.toUpperCase()}
+        </Link>
+        <div className="text-[10px] text-gray-500 mt-1 text-center leading-tight">
+          Joined {joinYear}<br />{author.postCount} posts
+        </div>
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap text-sm mb-0.5">
+          <Link
+            href={author.username ? `/profile/${author.username}` : "#"}
+            className="text-gray-200 font-semibold hover:text-pink-400"
+          >
+            {display}
+          </Link>
+          <span className={`text-xs ${rank.color}`}>
+            {rank.badge ? `${rank.badge} ` : ""}{rank.name}
+          </span>
+        </div>
+        <div className="text-xs text-gray-500 mb-2">
+          {formatRelative(createdAt)}
+          {views !== undefined && <> · {views} views</>}
+          {editedAt && <> · edited {formatRelative(editedAt)}</>}
+        </div>
+        <div className="whitespace-pre-wrap text-[14px] sm:text-[15px] leading-relaxed">{body}</div>
+      </div>
     </div>
   );
 }

@@ -54,16 +54,25 @@ export async function POST(req: Request) {
     if (n > 20) break;
   }
 
-  const thread = await db.thread.create({
-    data: {
-      title,
-      slug,
-      body: bodyText,
-      authorId: session.user.id,
-      categoryId: category.id,
-    },
-    select: { id: true, slug: true },
-  });
+  // Create thread + bump user's post count in a single transaction
+  const [thread] = await db.$transaction([
+    db.thread.create({
+      data: {
+        title,
+        slug,
+        body: bodyText,
+        authorId: session.user.id,
+        categoryId: category.id,
+        lastReplyAt: new Date(),
+        lastReplyAuthorId: session.user.id,
+      },
+      select: { id: true, slug: true },
+    }),
+    db.user.update({
+      where: { id: session.user.id },
+      data: { postCount: { increment: 1 } },
+    }),
+  ]);
 
   return NextResponse.json({ ok: true, thread, category: category.slug });
 }

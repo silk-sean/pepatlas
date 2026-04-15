@@ -41,21 +41,33 @@ export async function POST(req: Request, ctx: Params) {
     }
   }
 
-  const reply = await db.reply.create({
-    data: {
-      body: bodyText,
-      authorId: session.user.id,
-      threadId,
-      parentId,
-    },
-    select: { id: true },
-  });
-
-  // Touch thread so it sorts to top of its category
-  await db.thread.update({
-    where: { id: threadId },
-    data: { updatedAt: new Date() },
-  });
+  const now = new Date();
+  const [reply] = await db.$transaction([
+    db.reply.create({
+      data: {
+        body: bodyText,
+        authorId: session.user.id,
+        threadId,
+        parentId,
+      },
+      select: { id: true },
+    }),
+    // Update thread's denormalized counters + last reply info
+    db.thread.update({
+      where: { id: threadId },
+      data: {
+        updatedAt: now,
+        lastReplyAt: now,
+        lastReplyAuthorId: session.user.id,
+        replyCount: { increment: 1 },
+      },
+    }),
+    // Bump user post count
+    db.user.update({
+      where: { id: session.user.id },
+      data: { postCount: { increment: 1 } },
+    }),
+  ]);
 
   return NextResponse.json({ ok: true, reply });
 }

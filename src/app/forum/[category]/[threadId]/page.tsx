@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { ReplyForm } from "@/components/forum/ReplyForm";
 import { SubscribeButton } from "@/components/forum/SubscribeButton";
+import { BookmarkButton } from "@/components/forum/BookmarkButton";
 import { PostCard } from "@/components/forum/PostCard";
 import { buildReactionCounts } from "@/lib/reactions";
 
@@ -76,16 +77,29 @@ export default async function ThreadDetailPage({ params }: ThreadPageProps) {
   // Fetch viewer's role once so mod buttons can be shown/hidden server-side.
   let viewerRole: "MEMBER" | "MODERATOR" | "ADMIN" | null = null;
   let subscribed = false;
+  let bookmarked = false;
   if (viewerId) {
     const me = await db.user.findUnique({
       where: { id: viewerId },
       select: { role: true },
     });
     viewerRole = me?.role ?? null;
-    const sub = await db.threadSubscription.findUnique({
-      where: { userId_threadId: { userId: viewerId, threadId } },
-    });
+    const [sub, bm] = await Promise.all([
+      db.threadSubscription.findUnique({
+        where: { userId_threadId: { userId: viewerId, threadId } },
+      }),
+      db.bookmark.findUnique({
+        where: {
+          userId_type_targetId: {
+            userId: viewerId,
+            type: "thread",
+            targetId: threadId,
+          },
+        },
+      }),
+    ]);
     subscribed = !!sub;
+    bookmarked = !!bm;
   }
   const isMod = viewerRole === "MODERATOR" || viewerRole === "ADMIN";
 
@@ -117,11 +131,19 @@ export default async function ThreadDetailPage({ params }: ThreadPageProps) {
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white break-words">{thread.title}</h1>
         </div>
-        <SubscribeButton
-          threadId={thread.id}
-          initialSubscribed={subscribed}
-          isAuthed={!!viewerId}
-        />
+        <div className="flex items-center gap-2 shrink-0">
+          <BookmarkButton
+            targetId={thread.id}
+            type="thread"
+            initialBookmarked={bookmarked}
+            isAuthed={!!viewerId}
+          />
+          <SubscribeButton
+            threadId={thread.id}
+            initialSubscribed={subscribed}
+            isAuthed={!!viewerId}
+          />
+        </div>
       </div>
 
       <Card className="mb-6">

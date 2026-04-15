@@ -27,17 +27,37 @@ echo "=== 3/5: Pushing Prisma schema + seeding categories ==="
 docker compose exec -T app sh -c 'npx prisma db push --url "$DATABASE_URL"'
 # Seed categories via raw SQL (tsx isn't in the production image)
 docker compose exec -T postgres psql -U pepatlas -d pepatlas <<'SQL'
-INSERT INTO "ForumCategory" (id, slug, name, description, "sortOrder") VALUES
-  ('cat-beginner', 'beginner-questions', 'Beginner Questions', 'New to peptides? Start here.', 0),
-  ('cat-protocols', 'protocol-discussions', 'Protocol Discussions', 'Share and discuss protocols.', 1),
-  ('cat-logs', 'personal-logs', 'Personal Logs & Journals', 'Track your journey.', 2),
-  ('cat-bloodwork', 'bloodwork-metrics', 'Bloodwork & Metrics', 'Lab results and biomarkers.', 3),
-  ('cat-optimization', 'optimization', 'Optimization Strategies', 'Advanced wellness strategies.', 4),
-  ('cat-general', 'general', 'General Discussion', 'Off-topic and community chat.', 5)
+-- Top-level categories
+INSERT INTO "ForumCategory" (id, slug, name, description, "sortOrder", "parentId") VALUES
+  ('cat-beginner', 'beginner-questions', 'Beginner Questions', 'New to peptides? Start here.', 0, NULL),
+  ('cat-protocols', 'protocol-discussions', 'Protocol Discussions', 'Share and discuss protocols.', 1, NULL),
+  ('cat-compounds', 'compound-discussions', 'Compound Discussions', 'Peptide-specific threads.', 2, NULL),
+  ('cat-logs', 'personal-logs', 'Personal Logs & Journals', 'Track your journey.', 3, NULL),
+  ('cat-bloodwork', 'bloodwork-metrics', 'Bloodwork & Metrics', 'Lab results and biomarkers.', 4, NULL),
+  ('cat-optimization', 'optimization', 'Optimization Strategies', 'Advanced wellness strategies.', 5, NULL),
+  ('cat-general', 'general', 'General Discussion', 'Off-topic and community chat.', 6, NULL)
 ON CONFLICT (slug) DO UPDATE SET
   name = EXCLUDED.name,
   description = EXCLUDED.description,
   "sortOrder" = EXCLUDED."sortOrder";
+
+-- Sub-forums under "Compound Discussions"
+INSERT INTO "ForumCategory" (id, slug, name, description, "sortOrder", "parentId") VALUES
+  ('sub-bpc157', 'bpc-157', 'BPC-157', 'Body Protection Compound — healing, gut, recovery.', 0, 'cat-compounds'),
+  ('sub-tb500', 'tb-500', 'TB-500', 'Thymosin Beta-4 — tissue repair, recovery.', 1, 'cat-compounds'),
+  ('sub-ghkcu', 'ghk-cu', 'GHK-Cu', 'Copper peptide — skin, hair, wound healing.', 2, 'cat-compounds'),
+  ('sub-semaglutide', 'semaglutide', 'Semaglutide', 'GLP-1 — metabolic, weight.', 3, 'cat-compounds'),
+  ('sub-tirzepatide', 'tirzepatide', 'Tirzepatide', 'GLP-1/GIP — metabolic, weight.', 4, 'cat-compounds'),
+  ('sub-retatrutide', 'retatrutide', 'Retatrutide', 'Triple agonist — next-gen metabolic.', 5, 'cat-compounds'),
+  ('sub-ghs', 'gh-secretagogues', 'GH Secretagogues', 'CJC-1295, Ipamorelin, Sermorelin, Tesamorelin, MK-677.', 6, 'cat-compounds'),
+  ('sub-nootropics', 'nootropics', 'Nootropic Peptides', 'Semax, Selank, Dihexa, Cerebrolysin.', 7, 'cat-compounds'),
+  ('sub-longevity', 'longevity-peptides', 'Longevity & Khavinson', 'Epithalon, Pinealon, FOXO4-DRI, Rapamycin.', 8, 'cat-compounds'),
+  ('sub-other', 'other-compounds', 'Other Compounds', 'Everything else — PT-141, DSIP, MOTS-c, etc.', 9, 'cat-compounds')
+ON CONFLICT (slug) DO UPDATE SET
+  name = EXCLUDED.name,
+  description = EXCLUDED.description,
+  "sortOrder" = EXCLUDED."sortOrder",
+  "parentId" = EXCLUDED."parentId";
 SQL
 
 echo "=== 4/5: Starting HTTP-only nginx and issuing SSL cert ==="

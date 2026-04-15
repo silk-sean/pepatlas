@@ -1,11 +1,10 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { FORUM_CATEGORIES } from "@/lib/constants";
 import {
   Card,
+  CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SupplierBadge } from "@/components/shared/SupplierBadge";
@@ -20,61 +19,104 @@ export const metadata: Metadata = {
 };
 
 export default async function ForumPage() {
-  // Get thread counts per category
-  const categoryCounts = await db.forumCategory.findMany({
-    select: { slug: true, _count: { select: { threads: true } } },
+  // Load all categories with counts + sub-forums
+  const categories = await db.forumCategory.findMany({
+    orderBy: [{ parentId: "asc" }, { sortOrder: "asc" }],
+    include: {
+      _count: { select: { threads: true } },
+    },
   });
-  const countMap = new Map(categoryCounts.map((c) => [c.slug, c._count.threads]));
+
+  // Build tree: top-level categories get their children attached
+  const topLevel = categories.filter((c) => c.parentId === null);
+  const childrenByParent = new Map<string, typeof categories>();
+  for (const c of categories) {
+    if (c.parentId) {
+      const arr = childrenByParent.get(c.parentId) ?? [];
+      arr.push(c);
+      childrenByParent.set(c.parentId, arr);
+    }
+  }
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex gap-10">
-        {/* Main Content */}
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Forums</h1>
-              <p className="mt-2 text-gray-600">
+              <h1 className="text-3xl font-bold text-white">Forums</h1>
+              <p className="mt-2 text-gray-400">
                 Discuss peptides, share protocols, and learn from the community.
               </p>
             </div>
             <Link
               href="/forum/new"
-              className="inline-flex items-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center rounded-lg bg-pink-600 px-4 py-2 text-sm font-medium text-white hover:bg-pink-700 transition-colors"
             >
               New Thread
             </Link>
           </div>
 
           <div className="space-y-4">
-            {FORUM_CATEGORIES.map((cat) => (
-              <Link key={cat.slug} href={`/forum/${cat.slug}`}>
-                <Card className="hover:border-blue-300 transition-colors">
+            {topLevel.map((cat) => {
+              const subs = childrenByParent.get(cat.id) ?? [];
+              return (
+                <Card key={cat.id}>
                   <CardHeader>
                     <div className="flex items-center justify-between">
-                      <div>
+                      <div className="min-w-0">
                         <CardTitle className="text-base">
-                          {cat.name}
+                          <Link
+                            href={`/forum/${cat.slug}`}
+                            className="hover:text-pink-400"
+                          >
+                            {cat.name}
+                          </Link>
                         </CardTitle>
-                        <CardDescription className="text-sm mt-1">
+                        <p className="text-sm text-gray-400 mt-1">
                           {cat.description}
-                        </CardDescription>
+                        </p>
                       </div>
-                      <Badge variant="secondary" className="text-xs">
-                        {countMap.get(cat.slug) ?? 0} threads
+                      <Badge variant="secondary" className="text-xs shrink-0">
+                        {cat._count.threads} threads
                       </Badge>
                     </div>
                   </CardHeader>
+                  {subs.length > 0 && (
+                    <CardContent className="pt-0">
+                      <div className="grid sm:grid-cols-2 gap-2 border-t border-gray-800 pt-3">
+                        {subs.map((sub) => (
+                          <Link
+                            key={sub.id}
+                            href={`/forum/${sub.slug}`}
+                            className="flex items-center justify-between rounded p-2 hover:bg-[#22222a] transition-colors"
+                          >
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium text-gray-200 truncate">
+                                {sub.name}
+                              </div>
+                              <div className="text-xs text-gray-500 truncate">
+                                {sub.description}
+                              </div>
+                            </div>
+                            <span className="text-xs text-gray-500 shrink-0 ml-2">
+                              {sub._count.threads}
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
+                    </CardContent>
+                  )}
                 </Card>
-              </Link>
-            ))}
+              );
+            })}
           </div>
 
-          {/* Forum Rules */}
-          <div className="mt-8 rounded-lg border border-gray-200 bg-gray-50 p-6">
-            <h3 className="text-sm font-semibold text-gray-900">
+          <div className="mt-8 rounded-lg border border-gray-800 bg-[#1a1a22] p-6">
+            <h3 className="text-sm font-semibold text-gray-200">
               Forum Guidelines
             </h3>
-            <ul className="mt-3 space-y-2 text-sm text-gray-600">
+            <ul className="mt-3 space-y-2 text-sm text-gray-400">
               <li>
                 All discussions are for educational and research purposes only
               </li>
@@ -88,25 +130,8 @@ export default async function ForumPage() {
           </div>
         </div>
 
-        {/* Sidebar */}
         <aside className="hidden lg:block w-72 shrink-0 space-y-6">
           <SupplierBadge />
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Community Stats</CardTitle>
-            </CardHeader>
-            <div className="px-6 pb-6 grid grid-cols-2 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold text-gray-900">0</p>
-                <p className="text-xs text-gray-500">Members</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-gray-900">0</p>
-                <p className="text-xs text-gray-500">Threads</p>
-              </div>
-            </div>
-          </Card>
         </aside>
       </div>
     </div>

@@ -8,6 +8,19 @@ export async function Navbar() {
   const user = session?.user;
   const username = user?.name || user?.email?.split("@")[0];
 
+  // Look up role once so we can conditionally expose Admin/Mod tools in the nav.
+  let role: "MEMBER" | "MODERATOR" | "ADMIN" | null = null;
+  if (user?.id) {
+    // dynamic import kept simple — the call is already inside a Server Component
+    const { db } = await import("@/lib/db");
+    const me = await db.user.findUnique({
+      where: { id: user.id },
+      select: { role: true },
+    });
+    role = me?.role ?? null;
+  }
+  const isAdmin = role === "ADMIN";
+
   return (
     <header
       className="sticky top-0 z-50 border-b-2 border-[#FF2D78]"
@@ -64,6 +77,14 @@ export async function Navbar() {
         <div className="flex items-center gap-3 shrink-0">
           {user ? (
             <>
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="text-xs text-[#d6ff00] hover:underline uppercase tracking-wider font-bold"
+                >
+                  Admin
+                </Link>
+              )}
               <Link
                 href="/dashboard"
                 className="text-sm text-[#9E9EAF] hover:text-[#FF2D78]"

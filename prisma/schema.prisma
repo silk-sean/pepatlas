@@ -72,6 +72,8 @@ model User {
   protocols     SavedProtocol[]
   bookmarks     Bookmark[]
   logs          JournalEntry[]
+  reportsFiled    Report[] @relation("ReportReporter")
+  reportsResolved Report[] @relation("ReportResolver")
   lastReplyOn   Thread[] @relation("ThreadLastReplyAuthor")
 }
 
@@ -123,6 +125,7 @@ model Thread {
   reactions     Reaction[]
   subscriptions ThreadSubscription[]
   tags          Tag[]
+  reports       Report[]
 
   @@unique([categoryId, slug])
   @@index([categoryId, isPinned(sort: Desc), lastReplyAt(sort: Desc)])
@@ -145,6 +148,7 @@ model Reply {
   children  Reply[]    @relation("ReplyTree")
   votes     Vote[]
   reactions Reaction[]
+  reports   Report[]
 
   @@index([threadId, createdAt])
   @@index([authorId])
@@ -174,6 +178,37 @@ model Reaction {
   // One reaction-type per user per target
   @@unique([userId, threadId, type])
   @@unique([userId, replyId, type])
+  @@index([threadId])
+  @@index([replyId])
+}
+
+// === REPORTS (user-flagged content → mod queue) ===
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+model Report {
+  id        String       @id @default(cuid())
+  createdAt DateTime     @default(now())
+  resolvedAt DateTime?
+  status    ReportStatus @default(OPEN)
+  reason    String       @db.Text
+
+  reporter   User   @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reporterId String
+
+  resolver   User?   @relation("ReportResolver", fields: [resolverId], references: [id])
+  resolverId String?
+
+  // The flagged content — exactly one of threadId or replyId is set
+  thread   Thread? @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  threadId String?
+  reply    Reply?  @relation(fields: [replyId], references: [id], onDelete: Cascade)
+  replyId  String?
+
+  @@index([status, createdAt])
   @@index([threadId])
   @@index([replyId])
 }

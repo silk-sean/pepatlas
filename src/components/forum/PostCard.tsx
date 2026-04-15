@@ -8,6 +8,7 @@ import { Reactions, type ReactionCount } from "./Reactions";
 import { QuoteButton } from "./QuoteButton";
 import { ThreadModActions } from "./ThreadModActions";
 import { ReplyModActions } from "./ReplyModActions";
+import { ReportButton } from "./ReportButton";
 import { InlineBodyEditor } from "./InlineBodyEditor";
 import { rankFor } from "@/lib/ranks";
 import { isValidStack, type UserStack } from "@/lib/stack";
@@ -129,6 +130,11 @@ export function PostCard(props: Props) {
           />
           <div className="flex items-center gap-3 flex-wrap">
             <QuoteButton author={display} body={props.body} />
+            <ReportButton
+              threadId={props.kind === "thread" ? props.id : undefined}
+              replyId={props.kind === "reply" ? props.id : undefined}
+              isAuthed={props.isAuthed}
+            />
             {props.kind === "thread" && (
               <ThreadModActions
                 threadId={props.id}

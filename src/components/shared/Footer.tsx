@@ -1,10 +1,13 @@
 import Link from "next/link";
 import {
   SITE_NAME,
-  PEPPERPEDIA_URL,
-  SUPPLIER_URL,
+  PEPPERPEDIA_NAME,
+  PEPCALC_NAME,
   SUPPLIER_NAME,
   DISCLAIMER_TEXT,
+  pepperpediaUrl,
+  pepcalcUrl,
+  supplierUrl,
 } from "@/lib/constants";
 
 export function Footer() {
@@ -22,7 +25,11 @@ export function Footer() {
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-[#FF2D78] mb-4">Tools</h3>
             <ul className="space-y-2">
-              <li><Link href="/tools/dose-calculator" className="text-sm text-[#9E9EAF] hover:text-white transition-colors">Dose Calculator</Link></li>
+              <li>
+                <a href={pepcalcUrl("", "footer")} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9E9EAF] hover:text-white transition-colors">
+                  {PEPCALC_NAME} Dose Calculator
+                </a>
+              </li>
               <li><Link href="/tools/protocol-builder" className="text-sm text-[#9E9EAF] hover:text-white transition-colors">Protocol Builder</Link></li>
               <li><Link href="/tools/cost-calculator" className="text-sm text-[#9E9EAF] hover:text-white transition-colors">Cost Calculator</Link></li>
             </ul>
@@ -30,16 +37,26 @@ export function Footer() {
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-[#7B2FFF] mb-4">Knowledge</h3>
             <ul className="space-y-2">
-              <li><a href={PEPPERPEDIA_URL} className="text-sm text-[#9E9EAF] hover:text-white transition-colors">Pepperpedia</a></li>
-              <li><a href={`${PEPPERPEDIA_URL}/glossary`} className="text-sm text-[#9E9EAF] hover:text-white transition-colors">Glossary</a></li>
+              <li><a href={pepperpediaUrl("", "footer")} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9E9EAF] hover:text-white transition-colors">{PEPPERPEDIA_NAME}</a></li>
+              <li><a href={pepperpediaUrl("/glossary", "footer")} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9E9EAF] hover:text-white transition-colors">Glossary</a></li>
             </ul>
           </div>
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-[#FF2D78] mb-4">Trusted Partners</h3>
             <ul className="space-y-2">
               <li>
-                <a href={SUPPLIER_URL} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9E9EAF] hover:text-[#FF2D78] transition-colors">
+                <a href={supplierUrl("footer")} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9E9EAF] hover:text-[#FF2D78] transition-colors">
                   {SUPPLIER_NAME}
+                </a>
+              </li>
+              <li>
+                <a href={pepperpediaUrl("", "footer-partner")} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9E9EAF] hover:text-[#FF2D78] transition-colors">
+                  {PEPPERPEDIA_NAME}
+                </a>
+              </li>
+              <li>
+                <a href={pepcalcUrl("", "footer-partner")} target="_blank" rel="noopener noreferrer" className="text-sm text-[#9E9EAF] hover:text-[#FF2D78] transition-colors">
+                  {PEPCALC_NAME}
                 </a>
               </li>
             </ul>

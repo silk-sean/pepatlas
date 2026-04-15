@@ -4,8 +4,37 @@ export const SITE_DESCRIPTION =
   "The peptide community platform. Forums, tools, articles, and protocols for researchers and biohacking enthusiasts.";
 
 export const PEPPERPEDIA_URL = "https://pepperpedia.net";
+export const PEPPERPEDIA_NAME = "Pepperpedia";
+export const PEPCALC_URL = "https://peppercalc.com";
+export const PEPCALC_NAME = "Peppercalc";
 export const SUPPLIER_URL = "https://whitemarketpeptides.com";
 export const SUPPLIER_NAME = "White Market Peptides";
+
+/** Build a UTM-tagged peppercalc.com URL. */
+export function pepcalcUrl(path: string = "", content?: string): string {
+  const base = `${PEPCALC_URL}${path}`;
+  const sep = base.includes("?") ? "&" : "?";
+  let params = `${sep}utm_source=pepatlas&utm_medium=forum`;
+  if (content) params += `&utm_content=${content}`;
+  return `${base}${params}`;
+}
+
+/** Build a UTM-tagged pepperpedia.net URL. */
+export function pepperpediaUrl(path: string = "", content?: string): string {
+  const base = `${PEPPERPEDIA_URL}${path}`;
+  const sep = base.includes("?") ? "&" : "?";
+  let params = `${sep}utm_source=pepatlas&utm_medium=forum`;
+  if (content) params += `&utm_content=${content}`;
+  return `${base}${params}`;
+}
+
+/** Build a UTM-tagged whitemarketpeptides.com URL. */
+export function supplierUrl(content?: string): string {
+  const base = SUPPLIER_URL;
+  let params = `?utm_source=pepatlas&utm_medium=forum`;
+  if (content) params += `&utm_content=${content}`;
+  return `${base}${params}`;
+}
 
 export const FORUM_CATEGORIES = [
   {

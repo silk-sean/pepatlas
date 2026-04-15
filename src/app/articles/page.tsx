@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SupplierBadge } from "@/components/shared/SupplierBadge";
+import { PartnerSidebar } from "@/components/shared/PartnerSidebar";
 import { PEPPERPEDIA_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -71,7 +71,7 @@ export default function ArticlesPage() {
         </div>
 
         <aside className="hidden lg:block w-72 shrink-0 space-y-6">
-          <SupplierBadge />
+          <PartnerSidebar utm="articles-sidebar" />
 
           <Card>
             <CardHeader>

@@ -6,20 +6,22 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { pepcalcUrl } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Free Peptide Tools",
   description:
-    "Free peptide research tools: dose calculator, protocol builder, cost calculator, and cycle planner.",
+    "Free peptide research tools: Peppercalc dose calculator, protocol builder, cost calculator, and cycle planner.",
 };
 
 const TOOLS = [
   {
-    name: "Dose Calculator",
+    name: "Peppercalc Dose Calculator",
     description:
-      "Calculate exact injection volumes based on vial size, bacteriostatic water added, and desired dose. Supports all common peptides with preset values.",
-    href: "/tools/dose-calculator",
+      "Calculate exact injection volumes based on vial size, bacteriostatic water added, and desired dose. Supports all common peptides with preset values. Hosted at peppercalc.com.",
+    href: pepcalcUrl("", "tools-index"),
     badge: "Most Popular",
+    external: true,
   },
   {
     name: "Protocol Builder",
@@ -53,8 +55,8 @@ export default function ToolsPage() {
       </p>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2">
-        {TOOLS.map((tool) => (
-          <Link key={tool.href} href={tool.href}>
+        {TOOLS.map((tool) => {
+          const card = (
             <Card className="h-full hover:border-blue-300 transition-colors relative">
               {tool.badge && (
                 <span className="absolute top-3 right-3 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700">
@@ -66,8 +68,20 @@ export default function ToolsPage() {
                 <CardDescription>{tool.description}</CardDescription>
               </CardHeader>
             </Card>
-          </Link>
-        ))}
+          );
+          if (tool.external) {
+            return (
+              <a key={tool.href} href={tool.href} target="_blank" rel="noopener noreferrer">
+                {card}
+              </a>
+            );
+          }
+          return (
+            <Link key={tool.href} href={tool.href}>
+              {card}
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { SITE_URL } from "@/lib/constants";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SupplierBadge } from "@/components/shared/SupplierBadge";
+import { PartnerSidebar } from "@/components/shared/PartnerSidebar";
 import { ThreadRow } from "@/components/forum/ThreadRow";
 import { db } from "@/lib/db";
 
@@ -158,7 +158,7 @@ export default async function ForumCategoryPage({ params }: CategoryPageProps) {
         </div>
 
         <aside className="hidden lg:block w-72 shrink-0 space-y-6">
-          <SupplierBadge />
+          <PartnerSidebar utm="category-sidebar" />
           {peers.length > 0 && (
             <Card>
               <CardHeader>

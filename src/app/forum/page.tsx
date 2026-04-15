@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { SupplierBadge } from "@/components/shared/SupplierBadge";
+import { PartnerSidebar } from "@/components/shared/PartnerSidebar";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -131,7 +131,7 @@ export default async function ForumPage() {
         </div>
 
         <aside className="hidden lg:block w-72 shrink-0 space-y-6">
-          <SupplierBadge />
+          <PartnerSidebar utm="forum-sidebar" />
         </aside>
       </div>
     </div>

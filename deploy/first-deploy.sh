@@ -22,8 +22,9 @@ until docker compose exec -T postgres pg_isready -U pepatlas >/dev/null 2>&1; do
 done
 
 echo "=== 3/5: Pushing Prisma schema + seeding categories ==="
-# Run prisma db push from the app container (it has node_modules + schema)
-docker compose exec -T app npx prisma db push
+# Run prisma db push from the app container — pass --url explicitly since
+# prisma.config.ts may not pick up env vars from npx's inner shell
+docker compose exec -T app sh -c 'npx prisma db push --url "$DATABASE_URL"'
 # Seed categories via raw SQL (tsx isn't in the production image)
 docker compose exec -T postgres psql -U pepatlas -d pepatlas <<'SQL'
 INSERT INTO "ForumCategory" (id, slug, name, description, "sortOrder") VALUES

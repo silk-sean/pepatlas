@@ -52,5 +52,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return session;
     },
+    async signIn({ user, account }) {
+      // On Google sign-in, ensure the user has a username (required by forum
+      // for /profile/[username] links). We derive one from email if missing.
+      if (account?.provider === "google" && user.email && user.id) {
+        const existing = await db.user.findUnique({
+          where: { id: user.id },
+          select: { username: true },
+        });
+        if (existing && !existing.username) {
+          const base = user.email.split("@")[0].replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 24) || "user";
+          let candidate = base;
+          let n = 0;
+          // Find an available username
+          while (await db.user.findUnique({ where: { username: candidate } })) {
+            n += 1;
+            candidate = `${base}${n}`;
+            if (n > 50) { candidate = `${base}${user.id.slice(0, 6)}`; break; }
+          }
+          await db.user.update({ where: { id: user.id }, data: { username: candidate } });
+        }
+      }
+      return true;
+    },
   },
 });

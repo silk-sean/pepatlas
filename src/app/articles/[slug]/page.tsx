@@ -20,12 +20,7 @@ interface ArticlePageProps {
   params: Promise<{ slug: string }>;
 }
 
-export const dynamicParams = true;
-export const revalidate = false;
-
-export async function generateStaticParams() {
-  return [];
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,

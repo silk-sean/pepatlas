@@ -5,6 +5,10 @@ import {
   SUPPLIER_URL,
   SUPPLIER_NAME,
 } from "@/lib/constants";
+import { HotTopicsBox } from "@/components/forum/HotTopicsBox";
+
+// Homepage renders dynamically so Hot Topics / Newest are fresh on each visit
+export const dynamic = "force-dynamic";
 
 const TOOLS = [
   { name: "Dose Calculator", description: "Calculate exact injection volumes.", href: "/tools/dose-calculator" },
@@ -18,7 +22,7 @@ const FEATURED_ARTICLES = [
   { title: "Understanding Peptide Reconstitution", tags: ["Beginner", "Methods"], excerpt: "Everything you need to know about properly reconstituting lyophilized peptides for research use.", author: "Editorial", date: "1 week ago" },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
   return (
     <div className="mx-auto max-w-[1400px] px-8">
       {/* Hero squiggle */}
@@ -67,6 +71,19 @@ export default function HomePage() {
             </article>
           ))}
         </div>
+      </section>
+
+      {/* What's Happening — Hot Topics + Newest Threads */}
+      <section>
+        <div className="flex items-end justify-between mb-6">
+          <h2 className="section-title" style={{ color: "#FF2D78" }}>
+            What&apos;s<br />Happening
+          </h2>
+          <Link href="/forum" className="pa-tag pa-tag-solid">
+            All Discussions →
+          </Link>
+        </div>
+        <HotTopicsBox />
       </section>
 
       {/* Community Hub */}

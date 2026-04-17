@@ -15,6 +15,7 @@ import {
   pepperpediaUrl,
 } from "@/lib/constants";
 import { PartnerSidebar } from "@/components/shared/PartnerSidebar";
+import { articleSchema, breadcrumbSchema } from "@/lib/schema";
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
@@ -65,8 +66,37 @@ export default async function ArticleDetailPage({ params }: ArticlePageProps) {
     day: "numeric",
   });
 
+  const schemaArticle = articleSchema({
+    title: frontmatter.title,
+    slug: frontmatter.slug,
+    summary: frontmatter.summary,
+    author: frontmatter.author ?? "PepAtlas Editorial",
+    publishedAt: frontmatter.publishedAt,
+    updatedAt: frontmatter.updatedAt,
+    category: catMeta.label,
+  });
+  const schemaBreadcrumb = breadcrumbSchema([
+    { name: "Articles", url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://pepatlas.com"}/articles` },
+    {
+      name: catMeta.label,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://pepatlas.com"}/articles?category=${frontmatter.category}`,
+    },
+    {
+      name: frontmatter.title,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://pepatlas.com"}/articles/${frontmatter.slug}`,
+    },
+  ]);
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaArticle) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaBreadcrumb) }}
+      />
       {/* Breadcrumb */}
       <nav className="text-sm text-[#9E9EAF] mb-4">
         <Link href="/articles" className="hover:text-white transition-colors">

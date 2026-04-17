@@ -16,6 +16,18 @@ export async function POST(req: Request) {
   const title = String(body.title || "").trim();
   const bodyText = String(body.body || "").trim();
   const categorySlug = String(body.category || "").trim();
+  // Tags: accept array of strings OR comma-separated string; normalize, dedupe, cap at 5.
+  const rawTags: unknown = body.tags;
+  const tagNames = Array.from(
+    new Set(
+      (Array.isArray(rawTags)
+        ? rawTags
+        : String(rawTags ?? "").split(",")
+      )
+        .map((t) => String(t).trim().toLowerCase())
+        .filter((t) => t.length >= 2 && t.length <= 24)
+    )
+  ).slice(0, 5);
 
   if (title.length < 3 || title.length > 200) {
     return NextResponse.json(
@@ -54,6 +66,20 @@ export async function POST(req: Request) {
     if (n > 20) break;
   }
 
+  // Upsert tags first (outside transaction — cheap, and makes connect trivial)
+  const tagConnections: { id: string }[] = [];
+  for (const name of tagNames) {
+    const slug = name.replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+    if (!slug) continue;
+    const tag = await db.tag.upsert({
+      where: { slug },
+      update: {},
+      create: { name, slug },
+      select: { id: true },
+    });
+    tagConnections.push({ id: tag.id });
+  }
+
   // Create thread + bump user's post count in a single transaction
   const [thread] = await db.$transaction([
     db.thread.create({
@@ -65,6 +91,9 @@ export async function POST(req: Request) {
         categoryId: category.id,
         lastReplyAt: new Date(),
         lastReplyAuthorId: session.user.id,
+        ...(tagConnections.length
+          ? { tags: { connect: tagConnections } }
+          : {}),
       },
       select: { id: true, slug: true },
     }),

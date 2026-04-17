@@ -53,6 +53,7 @@ export async function Navbar() {
             {[
               { href: "/forum", label: "Forum" },
               { href: "/articles", label: "Articles" },
+              { href: "/members", label: "Members" },
               { href: "/tools", label: "Tools" },
               { href: SUPPLIER_URL, label: "Sources", external: true },
             ].map((link) => (

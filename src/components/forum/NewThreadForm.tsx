@@ -22,6 +22,7 @@ export function NewThreadForm() {
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [tags, setTags] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +45,7 @@ export function NewThreadForm() {
       const res = await fetch("/api/forum/threads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, body, category }),
+        body: JSON.stringify({ title, body, category, tags }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -102,6 +103,20 @@ export function NewThreadForm() {
           rows={10}
           className="mt-1"
         />
+      </div>
+      <div>
+        <Label htmlFor="tags">Tags (optional)</Label>
+        <Input
+          id="tags"
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
+          placeholder="comma-separated, e.g. bpc-157, recovery, tendon"
+          maxLength={200}
+          className="mt-1"
+        />
+        <p className="mt-1 text-xs text-gray-500">
+          Up to 5 tags. Lowercase, 2–24 chars each.
+        </p>
       </div>
       {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded">

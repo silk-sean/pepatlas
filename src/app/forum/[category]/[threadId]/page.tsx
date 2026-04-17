@@ -7,6 +7,8 @@ import { auth } from "@/auth";
 import { ReplyForm } from "@/components/forum/ReplyForm";
 import { SubscribeButton } from "@/components/forum/SubscribeButton";
 import { BookmarkButton } from "@/components/forum/BookmarkButton";
+import { threadSchema, breadcrumbSchema } from "@/lib/schema";
+import { SITE_URL } from "@/lib/constants";
 import { PostCard } from "@/components/forum/PostCard";
 import { buildReactionCounts } from "@/lib/reactions";
 
@@ -47,6 +49,7 @@ export default async function ThreadDetailPage({ params }: ThreadPageProps) {
         },
       },
       reactions: { select: { type: true, userId: true } },
+      tags: { select: { name: true, slug: true } },
       replies: {
         orderBy: { createdAt: "asc" },
         include: {
@@ -103,8 +106,40 @@ export default async function ThreadDetailPage({ params }: ThreadPageProps) {
   }
   const isMod = viewerRole === "MODERATOR" || viewerRole === "ADMIN";
 
+  // Structured data for search engines: full DiscussionForumPosting with comments
+  const schemaThread = threadSchema({
+    threadId: thread.id,
+    categorySlug: category,
+    categoryName: cat.name,
+    title: thread.title,
+    body: thread.body,
+    authorUsername: thread.author.username,
+    createdAt: thread.createdAt,
+    updatedAt: thread.updatedAt,
+    replyCount: thread.replyCount,
+    replies: thread.replies.slice(0, 20).map((r) => ({
+      id: r.id,
+      body: r.body,
+      authorUsername: r.author.username,
+      createdAt: r.createdAt,
+    })),
+  });
+  const schemaBreadcrumb = breadcrumbSchema([
+    { name: "Forum", url: `${SITE_URL}/forum` },
+    { name: cat.name, url: `${SITE_URL}/forum/${category}` },
+    { name: thread.title, url: `${SITE_URL}/forum/${category}/${thread.id}` },
+  ]);
+
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaThread) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaBreadcrumb) }}
+      />
       <nav className="text-sm text-gray-500 mb-4">
         <Link href="/forum" className="hover:text-gray-300">Forums</Link>
         {cat.parent && (
@@ -130,6 +165,19 @@ export default async function ThreadDetailPage({ params }: ThreadPageProps) {
             )}
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white break-words">{thread.title}</h1>
+          {thread.tags && thread.tags.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {thread.tags.map((t) => (
+                <Link
+                  key={t.slug}
+                  href={`/tags/${t.slug}`}
+                  className="inline-flex items-center rounded-full border border-[#333] bg-[#111] px-2.5 py-0.5 text-xs text-[#C5C5D4] hover:border-[#FF2D78] hover:text-[#FF2D78] transition-colors"
+                >
+                  #{t.name}
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <BookmarkButton

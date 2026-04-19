@@ -24,7 +24,7 @@ const FEATURED_ARTICLES = [
 
 export default async function HomePage() {
   return (
-    <div className="mx-auto max-w-[1400px] px-8">
+    <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
       {/* Hero squiggle */}
       <svg className="absolute top-24 left-0 w-[300px] opacity-30 pointer-events-none z-0" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
         <path d="M10,50 C40,10 60,90 90,50 C120,10 140,90 190,50" fill="none" stroke="rgba(255, 45, 120, 0.2)" strokeWidth="12" strokeLinecap="round" />
@@ -93,7 +93,7 @@ export default async function HomePage() {
         </h2>
       </div>
 
-      <div className="grid grid-cols-[1fr_380px] gap-8 mb-16">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 lg:gap-8 mb-16">
         {/* Forum threads */}
         <div className="pa-card overflow-hidden">
           <div className="pa-forum-header flex justify-between items-center">
@@ -192,10 +192,10 @@ export default async function HomePage() {
 
       {/* Cross-site banner — Visit Pepperpedia */}
       <div className="mb-16 rounded-3xl overflow-hidden" style={{ background: "linear-gradient(135deg, #7B2FFF, #FF2D78)", boxShadow: "0 12px 40px rgba(123, 47, 255, 0.3)" }}>
-        <div className="px-10 py-10 flex items-center justify-between">
-          <div>
+        <div className="px-6 py-8 sm:px-10 sm:py-10 flex items-center justify-between gap-4 flex-wrap">
+          <div className="min-w-0 flex-1">
             <p className="text-white/70 text-sm font-semibold uppercase tracking-wider mb-2">Powered by Research</p>
-            <h3 className="text-3xl font-extrabold text-white" style={{ fontFamily: "var(--font-display)" }}>
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-white" style={{ fontFamily: "var(--font-display)" }}>
               Visit Our Wiki — Pepperpedia
             </h3>
             <p className="text-white/80 mt-2 max-w-lg">

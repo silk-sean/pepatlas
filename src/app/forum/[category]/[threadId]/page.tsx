@@ -7,6 +7,8 @@ import { auth } from "@/auth";
 import { ReplyForm } from "@/components/forum/ReplyForm";
 import { SubscribeButton } from "@/components/forum/SubscribeButton";
 import { BookmarkButton } from "@/components/forum/BookmarkButton";
+import { PollBlock } from "@/components/forum/PollBlock";
+import { CreatePollForm } from "@/components/forum/CreatePollForm";
 import { threadSchema, breadcrumbSchema } from "@/lib/schema";
 import { SITE_URL } from "@/lib/constants";
 import { PostCard } from "@/components/forum/PostCard";
@@ -50,6 +52,19 @@ export default async function ThreadDetailPage({ params }: ThreadPageProps) {
       },
       reactions: { select: { type: true, userId: true } },
       tags: { select: { name: true, slug: true } },
+      poll: {
+        include: {
+          options: {
+            orderBy: { sortOrder: "asc" },
+            include: {
+              _count: { select: { votes: true } },
+            },
+          },
+          votes: {
+            select: { userId: true, optionId: true },
+          },
+        },
+      },
       replies: {
         orderBy: { createdAt: "asc" },
         include: {
@@ -193,6 +208,39 @@ export default async function ThreadDetailPage({ params }: ThreadPageProps) {
           />
         </div>
       </div>
+
+      {thread.poll && (() => {
+        const totalVotes = thread.poll.votes.length;
+        const myVotedOptionIds = viewerId
+          ? thread.poll.votes
+              .filter((v) => v.userId === viewerId)
+              .map((v) => v.optionId)
+          : [];
+        return (
+          <PollBlock
+            pollId={thread.poll.id}
+            question={thread.poll.question}
+            multipleChoice={thread.poll.multipleChoice}
+            closesAt={thread.poll.closesAt?.toISOString() ?? null}
+            options={thread.poll.options.map((o) => ({
+              id: o.id,
+              label: o.label,
+              voteCount: o._count.votes,
+            }))}
+            totalVotes={totalVotes}
+            myVotedOptionIds={myVotedOptionIds}
+            isAuthed={!!viewerId}
+          />
+        );
+      })()}
+
+      {!thread.poll &&
+        viewerId &&
+        (thread.author.id === viewerId || isMod) && (
+          <div className="mb-5">
+            <CreatePollForm threadId={thread.id} />
+          </div>
+        )}
 
       <Card className="mb-6">
         <CardContent className="py-5">

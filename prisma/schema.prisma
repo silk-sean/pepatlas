@@ -74,6 +74,7 @@ model User {
   logs          JournalEntry[]
   reportsFiled    Report[] @relation("ReportReporter")
   reportsResolved Report[] @relation("ReportResolver")
+  pollVotes       PollVote[]
   lastReplyOn   Thread[] @relation("ThreadLastReplyAuthor")
 }
 
@@ -126,10 +127,54 @@ model Thread {
   subscriptions ThreadSubscription[]
   tags          Tag[]
   reports       Report[]
+  poll          Poll?
 
   @@unique([categoryId, slug])
   @@index([categoryId, isPinned(sort: Desc), lastReplyAt(sort: Desc)])
   @@index([authorId])
+}
+
+// === POLLS (one optional poll per thread) ===
+model Poll {
+  id             String       @id @default(cuid())
+  question       String
+  multipleChoice Boolean      @default(false)
+  closesAt       DateTime?
+  createdAt      DateTime     @default(now())
+
+  thread         Thread       @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  threadId       String       @unique
+
+  options        PollOption[]
+  votes          PollVote[]
+}
+
+model PollOption {
+  id        String     @id @default(cuid())
+  label     String
+  sortOrder Int        @default(0)
+
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId    String
+  votes     PollVote[]
+
+  @@index([pollId, sortOrder])
+}
+
+model PollVote {
+  id        String     @id @default(cuid())
+  createdAt DateTime   @default(now())
+
+  poll      Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+  pollId    String
+  option    PollOption @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  optionId  String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  // One vote per option per user — allows multi-select without dup checks
+  @@unique([userId, optionId])
+  @@index([pollId])
 }
 
 model Reply {

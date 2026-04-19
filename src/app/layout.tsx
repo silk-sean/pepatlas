@@ -5,7 +5,10 @@ import { Navbar } from "@/components/shared/Navbar";
 import { Footer } from "@/components/shared/Footer";
 import { Providers } from "@/components/providers";
 import { SITE_NAME, SITE_URL, SITE_DESCRIPTION } from "@/lib/constants";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
+
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 const inter = Inter({
   variable: "--font-sans",
@@ -67,6 +70,7 @@ export default function RootLayout({
           <main className="flex-1 relative z-[1]">{children}</main>
           <Footer />
         </Providers>
+        {GA_ID && <GoogleAnalytics gaId={GA_ID} />}
       </body>
     </html>
   );

@@ -64,20 +64,17 @@ const CalcIcon = (
 export function PartnerSidebar({ utm = "sidebar" }: { utm?: string }) {
   return (
     <div className="space-y-4">
-      <PartnerCard
-        href={supplierUrl(utm)}
-        eyebrow="Verified Supplier"
-        eyebrowColor="#d6ff00"
-        title={SUPPLIER_NAME}
-        description="Research-grade peptides with third-party COA testing"
-        icon={CheckIcon}
-      />
+      <div className="px-1">
+        <div className="text-[11px] font-semibold uppercase tracking-wider text-[#666] mb-2">
+          Community Resources
+        </div>
+      </div>
       <PartnerCard
         href={pepperpediaUrl("", utm)}
-        eyebrow="Knowledge Base"
+        eyebrow="Reference"
         eyebrowColor="#FF2D78"
         title={PEPPERPEDIA_NAME}
-        description="The peptide encyclopedia — compounds, mechanisms, protocols"
+        description="Peptide encyclopedia — compounds, mechanisms, protocols"
         icon={BookIcon}
       />
       <PartnerCard
@@ -87,6 +84,14 @@ export function PartnerSidebar({ utm = "sidebar" }: { utm?: string }) {
         title={PEPCALC_NAME}
         description="Reconstitution and dose math — units, mcg/mg, syringe volume"
         icon={CalcIcon}
+      />
+      <PartnerCard
+        href={supplierUrl(utm)}
+        eyebrow="Research-grade"
+        eyebrowColor="#d6ff00"
+        title={SUPPLIER_NAME}
+        description="Third-party COA testing, independent lab verification"
+        icon={CheckIcon}
       />
     </div>
   );

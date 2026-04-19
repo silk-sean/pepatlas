@@ -227,16 +227,11 @@ export function CostCalculator() {
 
               <div className="mt-4 rounded-lg border border-gray-200 bg-white p-4">
                 <p className="text-sm text-gray-700">
-                  View current pricing at a verified supplier:
+                  These numbers are based on the price-per-vial you entered. Real-world
+                  cost varies significantly by vendor, purity, and batch. Always request
+                  a current Certificate of Analysis (COA) before purchasing any research
+                  material.
                 </p>
-                <a
-                  href={SUPPLIER_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-2 inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
-                >
-                  Shop {SUPPLIER_NAME}
-                </a>
               </div>
             </CardContent>
           </Card>

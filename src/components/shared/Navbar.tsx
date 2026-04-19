@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SITE_NAME, SUPPLIER_URL } from "@/lib/constants";
+import { SITE_NAME } from "@/lib/constants";
 import { GlobeIcon } from "./GlobeIcon";
 import { auth, signOut } from "@/auth";
 
@@ -55,14 +55,11 @@ export async function Navbar() {
               { href: "/articles", label: "Articles" },
               { href: "/members", label: "Members" },
               { href: "/tools", label: "Tools" },
-              { href: SUPPLIER_URL, label: "Sources", external: true },
+              { href: "/about", label: "About" },
             ].map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                {...(link.external
-                  ? { target: "_blank", rel: "noopener noreferrer" }
-                  : {})}
                 className="px-3 lg:px-4 py-2 rounded-full text-[#9E9EAF] hover:bg-[rgba(255,45,120,0.1)] hover:text-[#FF2D78] transition-all text-sm lg:text-base"
                 style={{
                   fontFamily: "var(--font-display)",

@@ -113,16 +113,25 @@ async function generateWithAI(
     });
 
   const directionBlock = direction?.trim()
-    ? `\n\n### USER DIRECTION FOR THIS BATCH:\n${direction.trim()}\n`
+    ? `\n\n### USER DIRECTION — THIS TAKES PRIORITY OVER DEFAULT BEHAVIOR:\n"${direction.trim()}"\n\nRespect this direction literally. If it asks for an intro tweet, write an intro tweet (don't just find an existing thread that's "intro-like"). If it asks to push a specific article, link to that article. If it asks for a certain tone, use that tone. Direction > defaults.\n`
     : "";
 
   const systemPrompt = `You write tweets for @pepatlas on X.
 
-PepAtlas is a peptide research community and discussion forum. Editorial stance: community-first, no-hype, not a vendor, not selling anything. Audience is biohackers, researchers, and people genuinely curious about peptides — they value honesty and dislike marketing tone.
+PepAtlas is a peptide research community and discussion forum at pepatlas.com. Editorial stance: community-first, no-hype, not a vendor, not selling anything. Audience is biohackers, researchers, and people genuinely curious about peptides — they value honesty and dislike marketing tone.
+
+Default behavior (when no user direction is given): draft tweets that highlight recent threads, articles, or community activity from the context provided.
+
+When a user direction IS given, respect it literally — the direction describes the TYPE and PURPOSE of tweet they want, and you follow that even if it means writing tweets that are NOT tied to a specific thread or article.
+
+URL options for each tweet:
+- For a specific thread: use the thread URL from context (https://pepatlas.com/forum/...)
+- For a specific article: use the article URL from context (https://pepatlas.com/articles/...)
+- For meta/intro/announcement tweets (no specific content to link): use https://pepatlas.com or https://pepatlas.com/forum
+- A tweet without a URL is allowed if the direction calls for pure brand voice
 
 Rules for every tweet you generate:
 - Under 280 characters TOTAL including the URL
-- Include ONE link from the context provided (pick the most relevant one for each tweet)
 - No hashtags unless truly apt (sparingly)
 - No emojis unless the tweet is clearly playful/meta
 - Don't use the word "peptide" more than once per tweet — it trips X's sensitive content filters
@@ -135,12 +144,14 @@ Rules for every tweet you generate:
 
 Output format: ONLY a raw JSON array of tweets, no markdown fences, no prose. Each tweet is an object:
 {
-  "body": "<the full tweet text, INCLUDING the URL at the end>",
-  "sourceType": "thread" | "article" | "stat" | "compound",
-  "sourceId": "<the thread ID or article slug — extract from the URL in the body>"
+  "body": "<the full tweet text, INCLUDING the URL at the end if one is used>",
+  "sourceType": "thread" | "article" | "stat" | "compound" | "meta" | "manual",
+  "sourceId": "<the thread ID or article slug if applicable — null for meta/manual>"
 }
 
-The "body" field must be the full tweet text ready to post, including the URL.`;
+Use sourceType "meta" when the tweet is a brand/intro/announcement not tied to a specific piece of content. Use "manual" when the user direction is so specific it's basically a composed tweet.
+
+The "body" field must be the full tweet text ready to post.`;
 
   const userPrompt = `Generate ${count} tweet candidates. Mix thread and article sources. Vary tone. Make them feel like different tweets, not templates.
 
@@ -306,17 +317,25 @@ async function generateRuleBased(
 export async function generateDrafts(count = 6, direction?: string) {
   let candidates: DraftCandidate[] = [];
   const haveAIKey = Boolean(process.env.ANTHROPIC_API_KEY);
+  const aiRanSuccessfully = { value: false };
 
   if (haveAIKey) {
     try {
       candidates = await generateWithAI(count, direction);
+      aiRanSuccessfully.value = candidates.length > 0;
     } catch (e) {
       console.error("[tweet-drafter] AI failed, falling back to rule-based:", e);
     }
   }
 
-  // Top up with rule-based if AI didn't return enough (or not set)
-  if (candidates.length < count) {
+  // Top up with rule-based ONLY if AI completely failed OR no direction was given.
+  // If a direction was given and AI returned some drafts, trust Claude — don't
+  // pollute the batch with generic rule-based drafts that ignore intent.
+  const shouldTopUp =
+    candidates.length < count &&
+    (!direction || !aiRanSuccessfully.value);
+
+  if (shouldTopUp) {
     const remaining = count - candidates.length;
     const rb = await generateRuleBased(remaining, direction);
     candidates.push(...rb);

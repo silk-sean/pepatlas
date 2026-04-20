@@ -69,13 +69,31 @@ export function DraftQueue({ drafts }: { drafts: DraftItem[] }) {
               ? "Queue empty."
               : `${drafts.length} awaiting your call.`}
           </p>
-          <button
-            onClick={onGenerate}
-            disabled={generating}
-            className="rounded-lg border border-[#7B2FFF] bg-[#7B2FFF]/10 px-3 py-1.5 text-xs font-medium text-[#7B2FFF] hover:bg-[#7B2FFF]/20 disabled:opacity-50"
-          >
-            {generating ? "Generating…" : "+ Generate drafts"}
-          </button>
+          <div className="flex items-center gap-2">
+            {drafts.length > 0 && (
+              <button
+                onClick={async () => {
+                  if (!confirm(`Reject all ${drafts.length} pending drafts?`)) return;
+                  setGenError(null);
+                  const res = await fetch("/api/admin/tweets/drafts/clear", {
+                    method: "POST",
+                  });
+                  if (res.ok) router.refresh();
+                }}
+                disabled={generating}
+                className="rounded-lg border border-[#333] px-3 py-1.5 text-xs text-[#9E9EAF] hover:bg-[#1a1a1a] disabled:opacity-50"
+              >
+                Reject all
+              </button>
+            )}
+            <button
+              onClick={onGenerate}
+              disabled={generating}
+              className="rounded-lg border border-[#7B2FFF] bg-[#7B2FFF]/10 px-3 py-1.5 text-xs font-medium text-[#7B2FFF] hover:bg-[#7B2FFF]/20 disabled:opacity-50"
+            >
+              {generating ? "Generating…" : "+ Generate drafts"}
+            </button>
+          </div>
         </div>
       </div>
 

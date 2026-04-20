@@ -9,11 +9,21 @@ import {
   pepcalcUrl,
   supplierUrl,
 } from "@/lib/constants";
+import { NewsletterSignup } from "@/components/newsletter/NewsletterSignup";
 
 export function Footer() {
   return (
     <footer className="border-t border-[rgba(255,45,120,0.15)] relative z-[1]" style={{ backgroundColor: "#0A0A0A" }}>
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-12">
+        <div className="mb-10 pb-10 border-b border-[rgba(255,255,255,0.05)]">
+          <div className="max-w-lg">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#FF2D78] mb-2">Weekly Digest</h3>
+            <p className="text-sm text-[#9E9EAF] mb-3">
+              Top threads + new articles. One email a week. No spam.
+            </p>
+            <NewsletterSignup source="footer" variant="footer" />
+          </div>
+        </div>
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-wider text-[#FF2D78] mb-4">Community</h3>

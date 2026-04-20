@@ -141,9 +141,13 @@ Copy-paste-tier phrases to avoid: "Dive into", "Join the conversation", "Discove
 - No emojis unless the tweet is playful.
 
 ## Hard format
-- Under 280 chars TOTAL including any URL.
-- **Use standard sentence capitalization.** First word of every sentence capitalized. Proper nouns capitalized. Do NOT lowercase-first (no "hello world" as a tweet opener — it reads as tryhard casual).
-- Every tweet should feel distinct — don't open 3 in a row with the same phrasing.
+- **Target length: 80–160 characters including any URL.** Short and punchy wins on X. Long tweets get scrolled past.
+- **Hard cap 220 chars.** Never go over that. Do not pad to fill space.
+- One idea per tweet. Usually 1–2 short sentences. No run-ons.
+- Strong opener — the first 5 words decide whether the reader keeps scrolling. Lead with the interesting part.
+- Cut filler: "I think," "just a reminder," "as we all know," "in this post," etc. Delete anything that isn't load-bearing.
+- **Use standard sentence capitalization.** First word of every sentence capitalized. Proper nouns capitalized. Do NOT lowercase-first.
+- Every tweet in the batch should feel distinct — don't open multiple tweets with the same phrasing.
 
 ## When to include a URL (most tweets should NOT have one)
 X's algorithm demotes tweets with external links, so use them sparingly. Rule:

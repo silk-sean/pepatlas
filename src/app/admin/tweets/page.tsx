@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { TweetComposer } from "@/components/admin/TweetComposer";
 import { DraftQueue } from "@/components/admin/DraftQueue";
+import { LocalTime } from "@/components/admin/LocalTime";
 
 export const dynamic = "force-dynamic";
 
@@ -61,11 +62,11 @@ export default async function AdminTweetsPage() {
       <section className="mb-10">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold uppercase tracking-wider text-[#FF2D78]">
-            Draft Queue ({pending.length})
+            Draft Queue
           </h2>
         </div>
         <DraftQueue
-          drafts={pending.map((d) => ({
+          pending={pending.map((d) => ({
             id: d.id,
             body: d.body,
             sourceType: d.sourceType ?? "",
@@ -74,34 +75,18 @@ export default async function AdminTweetsPage() {
             status: d.status,
             errorMessage: d.errorMessage ?? "",
           }))}
+          scheduled={scheduled.map((d) => ({
+            id: d.id,
+            body: d.body,
+            sourceType: d.sourceType ?? "",
+            sourceId: d.sourceId ?? "",
+            generatedAt: d.generatedAt.toISOString(),
+            status: d.status,
+            errorMessage: d.errorMessage ?? "",
+            scheduledFor: d.scheduledFor?.toISOString() ?? null,
+          }))}
         />
       </section>
-
-      {scheduled.length > 0 && (
-        <section className="mb-10">
-          <h2 className="text-sm font-semibold uppercase tracking-wider text-[#7B2FFF] mb-3">
-            Scheduled ({scheduled.length})
-          </h2>
-          <div className="space-y-2">
-            {scheduled.map((d) => (
-              <div
-                key={d.id}
-                className="rounded-lg border border-[#7B2FFF]/30 bg-[#7B2FFF]/5 p-3"
-              >
-                <p className="text-sm text-white leading-relaxed whitespace-pre-wrap">
-                  {d.body}
-                </p>
-                <p className="mt-2 text-xs text-[#7B2FFF]">
-                  Posts at{" "}
-                  {d.scheduledFor
-                    ? new Date(d.scheduledFor).toLocaleString()
-                    : "—"}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
 
       <section className="mb-10">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-[#7B2FFF] mb-3">
@@ -127,7 +112,7 @@ export default async function AdminTweetsPage() {
                 <div className="mt-2 text-xs text-[#666] flex items-center gap-3 flex-wrap">
                   <span>
                     Posted{" "}
-                    {d.postedAt ? new Date(d.postedAt).toLocaleString() : "—"}
+                    {d.postedAt ? <LocalTime iso={d.postedAt.toISOString()} /> : "—"}
                   </span>
                   {d.tweetUrl && (
                     <a

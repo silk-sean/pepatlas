@@ -25,7 +25,7 @@ export async function POST(
 
   const { id } = await params;
   const body = (await req.json().catch(() => null)) as {
-    action?: "approve" | "reject" | "edit" | "schedule";
+    action?: "approve" | "reject" | "edit" | "schedule" | "unschedule";
     body?: string;
     scheduledFor?: string; // ISO datetime
   } | null;
@@ -63,8 +63,23 @@ export async function POST(
     return NextResponse.json({ ok: true });
   }
 
+  if (action === "unschedule") {
+    if (draft.status !== "APPROVED") {
+      return NextResponse.json(
+        { error: `Cannot unschedule a ${draft.status} draft` },
+        { status: 400 }
+      );
+    }
+    const updated = await db.tweetDraft.update({
+      where: { id },
+      data: { status: "PENDING", scheduledFor: null },
+    });
+    return NextResponse.json({ ok: true, draft: updated });
+  }
+
   if (action === "schedule") {
-    if (draft.status !== "PENDING") {
+    // Allow scheduling PENDING and rescheduling APPROVED drafts.
+    if (draft.status !== "PENDING" && draft.status !== "APPROVED") {
       return NextResponse.json(
         { error: `Cannot schedule a ${draft.status} draft` },
         { status: 400 }

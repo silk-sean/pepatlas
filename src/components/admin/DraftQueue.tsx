@@ -17,6 +17,7 @@ export function DraftQueue({ drafts }: { drafts: DraftItem[] }) {
   const router = useRouter();
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
+  const [direction, setDirection] = useState("");
 
   async function onGenerate() {
     setGenError(null);
@@ -24,12 +25,17 @@ export function DraftQueue({ drafts }: { drafts: DraftItem[] }) {
     try {
       const res = await fetch("/api/admin/tweets/drafts/generate", {
         method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          direction: direction.trim() || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) {
         setGenError(data.error || "Failed");
         return;
       }
+      setDirection(""); // clear after successful gen
       router.refresh();
     } finally {
       setGenerating(false);
@@ -37,20 +43,40 @@ export function DraftQueue({ drafts }: { drafts: DraftItem[] }) {
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-[#666]">
-          {drafts.length === 0
-            ? "No pending drafts. Click Generate to create some."
-            : `${drafts.length} awaiting your call.`}
-        </p>
-        <button
-          onClick={onGenerate}
-          disabled={generating}
-          className="rounded-lg border border-[#7B2FFF] bg-[#7B2FFF]/10 px-3 py-1.5 text-xs font-medium text-[#7B2FFF] hover:bg-[#7B2FFF]/20 disabled:opacity-50"
-        >
-          {generating ? "Generating…" : "+ Generate drafts"}
-        </button>
+    <div className="space-y-4">
+      <div className="rounded-xl border border-[#333] bg-[#0f0f0f] p-4 space-y-3">
+        <div>
+          <label className="text-xs uppercase tracking-wider font-semibold text-[#9E9EAF] mb-1.5 block">
+            Direction (optional)
+          </label>
+          <textarea
+            value={direction}
+            onChange={(e) => setDirection(e.target.value)}
+            maxLength={500}
+            rows={2}
+            placeholder='e.g. "focus on GLP-1 protocols this week" · "push the new sermorelin article" · "be dryer, less marketing" · leave blank for free-range'
+            className="w-full rounded-lg border border-[#333] bg-[#0a0a0a] px-3 py-2 text-sm text-white placeholder:text-[#555] focus:border-[#7B2FFF] focus:outline-none resize-y"
+            disabled={generating}
+          />
+          <p className="text-[10px] text-[#555] mt-1">
+            {direction.length}/500
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-xs text-[#666]">
+            {drafts.length === 0
+              ? "Queue empty."
+              : `${drafts.length} awaiting your call.`}
+          </p>
+          <button
+            onClick={onGenerate}
+            disabled={generating}
+            className="rounded-lg border border-[#7B2FFF] bg-[#7B2FFF]/10 px-3 py-1.5 text-xs font-medium text-[#7B2FFF] hover:bg-[#7B2FFF]/20 disabled:opacity-50"
+          >
+            {generating ? "Generating…" : "+ Generate drafts"}
+          </button>
+        </div>
       </div>
 
       {genError && (

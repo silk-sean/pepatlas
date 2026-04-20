@@ -35,7 +35,7 @@ export function DraftQueue({ drafts }: { drafts: DraftItem[] }) {
         setGenError(data.error || "Failed");
         return;
       }
-      setDirection(""); // clear after successful gen
+      // Keep the direction so user can tweak + regenerate without retyping.
       router.refresh();
     } finally {
       setGenerating(false);

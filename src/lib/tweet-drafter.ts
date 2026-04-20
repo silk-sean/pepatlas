@@ -113,83 +113,125 @@ async function generateWithAI(
     });
 
   const hasDirection = Boolean(direction?.trim());
-  const directionBlock = hasDirection
-    ? `\n\n### USER DIRECTION — THIS IS THE BRIEF FOR THE ENTIRE BATCH:\n"${direction!.trim()}"\n\nCRITICAL: Every single tweet you generate must serve this direction. If the direction is "intro tweet introducing the community," write ${count} DIFFERENT intro tweets — not 1 intro plus 5 thread highlights. If the direction is "push the sermorelin article," write ${count} tweets angled at that article. The direction replaces the default content-highlight behavior for this entire batch.\n\nUse the site context below only as reference material (audience vocabulary, what's on the site, what tone fits). Do NOT use it as a source of tweets to link to unless the direction specifically asks you to.\n`
-    : "";
 
   const systemPrompt = `You write tweets for @pepatlas on X.
 
-PepAtlas is a peptide research community and discussion forum at pepatlas.com. Editorial stance: community-first, no-hype, not a vendor, not selling anything. Audience is biohackers, researchers, and people genuinely curious about peptides — they value honesty and dislike marketing tone.
+PepAtlas is a peptide research community and discussion forum at pepatlas.com. Editorial stance: community-first, no-hype, not a vendor, not selling anything. Audience is biohackers, researchers, and people curious about peptides. They dislike marketing tone and spot hype instantly.
 
-## Mode: which behavior to follow
+## ABSOLUTE RULE: NO INVENTED CONTENT
+Do not make up threads, posts, users, numbers, studies, results, or timelines. If the user asks for a tweet and you don't have a real piece of content from the provided context to reference, write a tweet that does NOT reference any specific content — a brand/community/idea tweet. Never fabricate a post like "Someone just shared their 12-week log" unless that log is explicitly in the context below.
 
-**No user direction given** → Default mode: draft tweets that highlight recent threads, articles, or community activity from the provided context. Mix content types. Make each tweet distinct.
+## HOW TO READ THE USER'S DIRECTION
+The user's direction is usually a VIBE, REFERENCE, or INTENT — not a literal keyword to pattern-match. Read it the way a smart copywriter would. Examples:
+- "hello world Tiger Woods back in the 90s, this is our first impression" → Read as: bold, confident debut, culturally sharp, quiet swagger. Don't literally write about Tiger Woods or say "hello world."
+- "be dryer, less marketing" → Strip hype words, shorten, sound like a forum post not an ad.
+- "push the sermorelin article" → All tweets aim at that one article from different angles.
+- "something funny" → Actually be funny. Not corporate-funny.
+Write tweets that FEEL like what the user described. Match the vibe, don't parrot the words.
 
-**User direction given** → Direction mode: EVERY tweet in the batch must serve the user's direction. The direction defines the purpose and tone for ALL tweets, not just one of them. If the direction can't naturally support that many tweets (e.g., "push this one article"), write ${count} distinct angles on that same subject. Do NOT revert to the default content-highlight behavior. Do NOT sneak in thread or article highlights unless the direction explicitly asks for them.
+## DON'T BE A TEMPLATE
+Copy-paste-tier phrases to avoid: "Dive into", "Join the conversation", "Discover", "Explore", "Welcome to", "Introducing", "Unlock", "the future of", "game-changing", "next level". Write like a real person on X, not a LinkedIn post.
 
-URL options for each tweet:
-- For a specific thread: use the thread URL from context (https://pepatlas.com/forum/...)
-- For a specific article: use the article URL from context (https://pepatlas.com/articles/...)
-- For meta/intro/announcement tweets (no specific content to link): use https://pepatlas.com or https://pepatlas.com/forum
-- A tweet without a URL is allowed if the direction calls for pure brand voice
+## Voice
+- Direct, smart, a touch dry. Sounds like a knowledgeable forum regular, not a brand.
+- Never uses "buy", "sell", "shop", "discount", "vendor", "game-changer", "revolutionary", "unlock".
+- Doesn't promise outcomes.
+- Uses "peptide" at most once per tweet (sensitive-content filters).
+- No hashtags unless genuinely apt.
+- No emojis unless the tweet is playful.
 
-Rules for every tweet you generate:
-- Under 280 characters TOTAL including the URL
-- No hashtags unless truly apt (sparingly)
-- No emojis unless the tweet is clearly playful/meta
-- Don't use the word "peptide" more than once per tweet — it trips X's sensitive content filters
-- Never use "buy", "sell", "shop", "discount", "vendor" — we're not selling anything
-- Don't promise outcomes ("lose 20 lbs!")
-- Skip hype words: "revolutionary", "game-changer", "unlock"
-- Voice: direct, smart, a little dry, sounds like a knowledgeable forum regular
-- Tweets should feel distinctive from each other — don't start 6 tweets with "New on PepAtlas:"
-- If a thread title is already a question, just reference it; don't reframe
+## Hard format
+- Under 280 chars TOTAL including any URL.
+- **Use standard sentence capitalization.** First word of every sentence capitalized. Proper nouns capitalized. Do NOT lowercase-first (no "hello world" as a tweet opener — it reads as tryhard casual).
+- Every tweet should feel distinct — don't open 3 in a row with the same phrasing.
 
-Output format: ONLY a raw JSON array of tweets, no markdown fences, no prose. Each tweet is an object:
+## When to include a URL (most tweets should NOT have one)
+X's algorithm demotes tweets with external links, so use them sparingly. Rule:
+- **Include a URL ONLY when the tweet is specifically pointing at a piece of content** — a listed thread or article from the reference context. In that case, use that item's full URL.
+- **Do NOT include a URL for** brand/intro/announcement/voice/meta tweets. A tweet that says "PepAtlas is live" or "Come see what we're building" should end without a link. These tweets exist to build voice and recognition, not to drive a click.
+- **Never add https://pepatlas.com as a filler URL just because the tweet "should have a link."** No URL is better than a weak URL.
+- Target: in a batch of ${count}, roughly half should have no URL at all. If every tweet has a link, you're doing it wrong.
+
+## Output
+ONLY a raw JSON array. No markdown fences, no prose. Each item:
 {
-  "body": "<the full tweet text, INCLUDING the URL at the end if one is used>",
-  "sourceType": "thread" | "article" | "stat" | "compound" | "meta" | "manual",
-  "sourceId": "<the thread ID or article slug if applicable — null for meta/manual>"
+  "body": "<full tweet text INCLUDING any URL>",
+  "sourceType": "thread" | "article" | "meta" | "stat",
+  "sourceId": "<thread ID or article slug if the tweet references one, else null>"
 }
 
-Use sourceType "meta" when the tweet is a brand/intro/announcement not tied to a specific piece of content. Use "manual" when the user direction is so specific it's basically a composed tweet.
+Use "meta" for brand/intro/community tweets not tied to specific content. Use "thread" or "article" ONLY if you're referencing a specific item from the provided context.`;
 
-The "body" field must be the full tweet text ready to post.`;
+  // Build the user prompt. When direction is given, direction goes FIRST and
+  // site context is minimized — context is a reference, not a menu.
+  let userPrompt: string;
 
-  const batchGoal = hasDirection
-    ? `Generate ${count} tweet candidates that ALL serve the user direction below. Vary angle and phrasing, but stay on-brief for every single one.`
-    : `Generate ${count} tweet candidates. Mix thread and article sources. Vary tone. Make them feel like different tweets, not templates.`;
+  if (hasDirection) {
+    const hasRealContent = hotThreadLines.length > 0 || articleLines.length > 0;
+    const contextBlock = hasRealContent
+      ? `\n\n---\nReference context (use ONLY if the direction explicitly asks to reference site content; otherwise ignore):\n${
+          hotThreadLines.length > 0
+            ? `\nExisting threads:\n${hotThreadLines.slice(0, 5).join("\n")}`
+            : ""
+        }${
+          articleLines.length > 0
+            ? `\n\nExisting articles:\n${articleLines.slice(0, 5).join("\n")}`
+            : ""
+        }`
+      : "";
 
-  const userPrompt = `${batchGoal}
+    userPrompt = `DIRECTION FROM THE USER — this is the brief for ALL ${count} tweets in the batch:
+
+"${direction!.trim()}"
+
+Write ${count} tweets that serve this direction. Each tweet should be a different angle/phrasing on the same brief — not ${count - 1} on-brief + 1 random content highlight.
+
+If the direction doesn't ask for a thread or article link, DON'T invent one and DON'T pull one from the reference context. A tweet without a URL (or with just https://pepatlas.com) is fine.${contextBlock}
+
+Return the JSON array now.`;
+  } else {
+    userPrompt = `Generate ${count} tweet candidates. Mix thread and article sources. Vary tone. Make them feel distinct.
 
 ### CURRENT ACTIVE THREADS (last 14 days, sorted by activity):
 ${hotThreadLines.join("\n") || "(none)"}
 
 ### RECENTLY POSTED THREADS:
-${ctx.recentThreads
-  .slice(0, 5)
-  .map(
-    (t) =>
-      `- [${t.category.name}] "${t.title}" ${SITE_URL}/forum/${t.category.slug}/${t.id}`
-  )
-  .join("\n") || "(none)"}
+${
+  ctx.recentThreads
+    .slice(0, 5)
+    .map(
+      (t) =>
+        `- [${t.category.name}] "${t.title}" ${SITE_URL}/forum/${t.category.slug}/${t.id}`
+    )
+    .join("\n") || "(none)"
+}
 
 ### ARTICLES YOU CAN REFERENCE:
 ${articleLines.join("\n") || "(none)"}
 
 ### THIS WEEK STATS:
 - ${ctx.stats.threadCount} new threads, ${ctx.stats.replyCount} replies
-${directionBlock}
 
-Return ONLY a JSON array. No preface, no code fences, no trailing commentary.`;
+Return ONLY a JSON array.`;
+  }
+
+  // Sonnet when direction is given (better instruction adherence). Haiku
+  // otherwise (cheaper, fine for templated content pulls).
+  const model = hasDirection ? "claude-sonnet-4-5" : "claude-haiku-4-5";
 
   const client = new Anthropic({ apiKey: key });
   const res = await client.messages.create({
-    model: "claude-haiku-4-5",
+    model,
     max_tokens: 2000,
     system: systemPrompt,
     messages: [{ role: "user", content: userPrompt }],
   });
+
+  if (process.env.NODE_ENV !== "production") {
+    console.log(
+      `[tweet-drafter] model=${model} direction=${hasDirection ? JSON.stringify(direction) : "(none)"}`
+    );
+  }
 
   const text =
     res.content

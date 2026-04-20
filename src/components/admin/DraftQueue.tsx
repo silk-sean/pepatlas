@@ -28,6 +28,34 @@ export function DraftQueue({ drafts }: { drafts: DraftItem[] }) {
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
   const [direction, setDirection] = useState("");
+  const [stagger, setStagger] = useState(false);
+  const [staggerCount, setStaggerCount] = useState(6);
+  const [staggerHours, setStaggerHours] = useState(12);
+  const [staggerBusy, setStaggerBusy] = useState(false);
+
+  async function onStagger() {
+    setGenError(null);
+    setStaggerBusy(true);
+    try {
+      const res = await fetch("/api/admin/tweets/drafts/stagger", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          count: staggerCount,
+          windowHours: staggerHours,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        setGenError(data.error || "Stagger failed");
+        return;
+      }
+      setStagger(false);
+      router.refresh();
+    } finally {
+      setStaggerBusy(false);
+    }
+  }
 
   async function onGenerate() {
     setGenError(null);
@@ -81,30 +109,91 @@ export function DraftQueue({ drafts }: { drafts: DraftItem[] }) {
           </p>
           <div className="flex items-center gap-2">
             {drafts.length > 0 && (
-              <button
-                onClick={async () => {
-                  if (!confirm(`Reject all ${drafts.length} pending drafts?`)) return;
-                  setGenError(null);
-                  const res = await fetch("/api/admin/tweets/drafts/clear", {
-                    method: "POST",
-                  });
-                  if (res.ok) router.refresh();
-                }}
-                disabled={generating}
-                className="rounded-lg border border-[#333] px-3 py-1.5 text-xs text-[#9E9EAF] hover:bg-[#1a1a1a] disabled:opacity-50"
-              >
-                Reject all
-              </button>
+              <>
+                <button
+                  onClick={() => setStagger((s) => !s)}
+                  disabled={generating || staggerBusy}
+                  className="rounded-lg border border-[#333] px-3 py-1.5 text-xs text-[#C5C5D4] hover:bg-[#1a1a1a] disabled:opacity-50"
+                >
+                  {stagger ? "Cancel" : "Auto-stagger"}
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!confirm(`Reject all ${drafts.length} pending drafts?`)) return;
+                    setGenError(null);
+                    const res = await fetch("/api/admin/tweets/drafts/clear", {
+                      method: "POST",
+                    });
+                    if (res.ok) router.refresh();
+                  }}
+                  disabled={generating || staggerBusy}
+                  className="rounded-lg border border-[#333] px-3 py-1.5 text-xs text-[#9E9EAF] hover:bg-[#1a1a1a] disabled:opacity-50"
+                >
+                  Reject all
+                </button>
+              </>
             )}
             <button
               onClick={onGenerate}
-              disabled={generating}
+              disabled={generating || staggerBusy}
               className="rounded-lg border border-[#7B2FFF] bg-[#7B2FFF]/10 px-3 py-1.5 text-xs font-medium text-[#7B2FFF] hover:bg-[#7B2FFF]/20 disabled:opacity-50"
             >
               {generating ? "Generating…" : "+ Generate drafts"}
             </button>
           </div>
         </div>
+
+        {stagger && (
+          <div className="mt-3 rounded-lg border border-[#333] bg-[#0a0a0a] p-3 space-y-2">
+            <p className="text-xs text-[#9E9EAF]">
+              Schedule the oldest {staggerCount} pending drafts evenly across
+              the next {staggerHours} hours. First tweet goes out ~now, last at
+              ~+{Math.round(((staggerHours * 60) / staggerCount) * (staggerCount - 1))} min.
+            </p>
+            <div className="flex items-center gap-3 flex-wrap">
+              <label className="flex items-center gap-2 text-xs text-[#C5C5D4]">
+                Tweets
+                <input
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={staggerCount}
+                  onChange={(e) =>
+                    setStaggerCount(Math.max(1, Math.min(20, Number(e.target.value) || 1)))
+                  }
+                  className="w-16 rounded border border-[#333] bg-[#111] px-2 py-1 text-xs text-white focus:border-[#7B2FFF] focus:outline-none"
+                />
+              </label>
+              <label className="flex items-center gap-2 text-xs text-[#C5C5D4]">
+                Over
+                <input
+                  type="number"
+                  min={1}
+                  max={168}
+                  value={staggerHours}
+                  onChange={(e) =>
+                    setStaggerHours(
+                      Math.max(0.25, Math.min(168, Number(e.target.value) || 1))
+                    )
+                  }
+                  className="w-16 rounded border border-[#333] bg-[#111] px-2 py-1 text-xs text-white focus:border-[#7B2FFF] focus:outline-none"
+                />
+                hours
+              </label>
+              <button
+                onClick={onStagger}
+                disabled={staggerBusy || staggerCount < 1 || staggerCount > drafts.length}
+                className="rounded bg-[#7B2FFF] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#6a24e0] disabled:opacity-50"
+              >
+                {staggerBusy
+                  ? "Scheduling…"
+                  : staggerCount > drafts.length
+                  ? `Need ${staggerCount} drafts (have ${drafts.length})`
+                  : `Schedule ${staggerCount} tweets`}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {genError && (

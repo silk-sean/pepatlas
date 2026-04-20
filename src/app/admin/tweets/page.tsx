@@ -42,7 +42,7 @@ export default async function AdminTweetsPage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-6">
         <nav className="text-sm text-[#9E9EAF] mb-3">
           <Link href="/admin" className="hover:text-white transition-colors">

@@ -284,37 +284,49 @@ export function DraftQueue({
         </div>
       )}
 
-      {/* ── Scheduled section ───────────────────────────────── */}
-      {scheduled.length > 0 && (
-        <section className="pt-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-[#7B2FFF] mb-2">
-            Scheduled ({scheduled.length})
-          </h3>
-          <div className="space-y-2">
-            {scheduled.map((d) => (
-              <DraftCard key={d.id} draft={d} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── Pending section ─────────────────────────────────── */}
+      {/* ── Two-column board: Pending (left) · Scheduled (right) ── */}
       {pending.length === 0 && scheduled.length === 0 ? (
         <div className="rounded-xl border border-dashed border-[#333] p-8 text-center text-sm text-[#666]">
           Empty queue. Generate drafts to get started.
         </div>
-      ) : pending.length > 0 ? (
-        <section className="pt-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-[#FF2D78] mb-2">
-            Pending ({pending.length})
-          </h3>
-          <div className="space-y-2">
-            {pending.map((d) => (
-              <DraftCard key={d.id} draft={d} />
-            ))}
-          </div>
-        </section>
-      ) : null}
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-2">
+          <section>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#FF2D78] mb-2 sticky top-0 bg-[#0A0A0A] py-1 z-[1]">
+              Pending ({pending.length})
+            </h3>
+            {pending.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-[#222] p-6 text-center text-xs text-[#555]">
+                No pending drafts. Generate more?
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {pending.map((d) => (
+                  <DraftCard key={d.id} draft={d} />
+                ))}
+              </div>
+            )}
+          </section>
+
+          <section>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-[#7B2FFF] mb-2 sticky top-0 bg-[#0A0A0A] py-1 z-[1]">
+              Scheduled ({scheduled.length})
+            </h3>
+            {scheduled.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-[#222] p-6 text-center text-xs text-[#555]">
+                Nothing scheduled. Auto-stagger pending drafts or schedule
+                individually.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {scheduled.map((d) => (
+                  <DraftCard key={d.id} draft={d} />
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      )}
     </div>
   );
 }

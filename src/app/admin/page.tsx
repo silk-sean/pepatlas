@@ -75,6 +75,12 @@ export default async function AdminPage() {
       accent: openReportCount > 0 ? "#FF2D78" : "#9E9EAF",
       href: "/admin/reports",
     },
+    {
+      label: "Post Tweet",
+      value: "→",
+      accent: "#1DA1F2",
+      href: "/admin/tweets",
+    },
   ];
 
   return (

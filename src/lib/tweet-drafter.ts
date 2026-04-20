@@ -137,7 +137,7 @@ Copy-paste-tier phrases to avoid: "Dive into", "Join the conversation", "Discove
 - Never uses "buy", "sell", "shop", "discount", "vendor", "game-changer", "revolutionary", "unlock".
 - Doesn't promise outcomes.
 - Uses "peptide" at most once per tweet (sensitive-content filters).
-- No hashtags unless genuinely apt.
+- Hashtags: 0–2 max per tweet, and ONLY when the tag is genuinely topical and specific. X's algorithm demotes hashtag-stuffed tweets as spam. Good tags for this niche when relevant: #BPC157, #tirzepatide, #semaglutide, #GLP1, #peptides, #biohacking, #nootropics, #TRT, #longevity. Skip broad/useless ones (#wellness, #health, #fitness). Most tweets should have zero hashtags. Never stack 3+ hashtags.
 - No emojis unless the tweet is playful.
 
 ## Hard format

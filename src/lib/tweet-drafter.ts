@@ -112,17 +112,20 @@ async function generateWithAI(
       return `- [${cat}] "${a.frontmatter.title}" — ${a.frontmatter.summary} ${url}`;
     });
 
-  const directionBlock = direction?.trim()
-    ? `\n\n### USER DIRECTION — THIS TAKES PRIORITY OVER DEFAULT BEHAVIOR:\n"${direction.trim()}"\n\nRespect this direction literally. If it asks for an intro tweet, write an intro tweet (don't just find an existing thread that's "intro-like"). If it asks to push a specific article, link to that article. If it asks for a certain tone, use that tone. Direction > defaults.\n`
+  const hasDirection = Boolean(direction?.trim());
+  const directionBlock = hasDirection
+    ? `\n\n### USER DIRECTION — THIS IS THE BRIEF FOR THE ENTIRE BATCH:\n"${direction!.trim()}"\n\nCRITICAL: Every single tweet you generate must serve this direction. If the direction is "intro tweet introducing the community," write ${count} DIFFERENT intro tweets — not 1 intro plus 5 thread highlights. If the direction is "push the sermorelin article," write ${count} tweets angled at that article. The direction replaces the default content-highlight behavior for this entire batch.\n\nUse the site context below only as reference material (audience vocabulary, what's on the site, what tone fits). Do NOT use it as a source of tweets to link to unless the direction specifically asks you to.\n`
     : "";
 
   const systemPrompt = `You write tweets for @pepatlas on X.
 
 PepAtlas is a peptide research community and discussion forum at pepatlas.com. Editorial stance: community-first, no-hype, not a vendor, not selling anything. Audience is biohackers, researchers, and people genuinely curious about peptides — they value honesty and dislike marketing tone.
 
-Default behavior (when no user direction is given): draft tweets that highlight recent threads, articles, or community activity from the context provided.
+## Mode: which behavior to follow
 
-When a user direction IS given, respect it literally — the direction describes the TYPE and PURPOSE of tweet they want, and you follow that even if it means writing tweets that are NOT tied to a specific thread or article.
+**No user direction given** → Default mode: draft tweets that highlight recent threads, articles, or community activity from the provided context. Mix content types. Make each tweet distinct.
+
+**User direction given** → Direction mode: EVERY tweet in the batch must serve the user's direction. The direction defines the purpose and tone for ALL tweets, not just one of them. If the direction can't naturally support that many tweets (e.g., "push this one article"), write ${count} distinct angles on that same subject. Do NOT revert to the default content-highlight behavior. Do NOT sneak in thread or article highlights unless the direction explicitly asks for them.
 
 URL options for each tweet:
 - For a specific thread: use the thread URL from context (https://pepatlas.com/forum/...)
@@ -153,7 +156,11 @@ Use sourceType "meta" when the tweet is a brand/intro/announcement not tied to a
 
 The "body" field must be the full tweet text ready to post.`;
 
-  const userPrompt = `Generate ${count} tweet candidates. Mix thread and article sources. Vary tone. Make them feel like different tweets, not templates.
+  const batchGoal = hasDirection
+    ? `Generate ${count} tweet candidates that ALL serve the user direction below. Vary angle and phrasing, but stay on-brief for every single one.`
+    : `Generate ${count} tweet candidates. Mix thread and article sources. Vary tone. Make them feel like different tweets, not templates.`;
+
+  const userPrompt = `${batchGoal}
 
 ### CURRENT ACTIVE THREADS (last 14 days, sorted by activity):
 ${hotThreadLines.join("\n") || "(none)"}

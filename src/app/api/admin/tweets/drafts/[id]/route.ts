@@ -25,8 +25,9 @@ export async function POST(
 
   const { id } = await params;
   const body = (await req.json().catch(() => null)) as {
-    action?: "approve" | "reject" | "edit";
+    action?: "approve" | "reject" | "edit" | "schedule";
     body?: string;
+    scheduledFor?: string; // ISO datetime
   } | null;
 
   const action = body?.action;
@@ -60,6 +61,40 @@ export async function POST(
       data: { status: "REJECTED" },
     });
     return NextResponse.json({ ok: true });
+  }
+
+  if (action === "schedule") {
+    if (draft.status !== "PENDING") {
+      return NextResponse.json(
+        { error: `Cannot schedule a ${draft.status} draft` },
+        { status: 400 }
+      );
+    }
+    const iso = body?.scheduledFor;
+    if (!iso) {
+      return NextResponse.json(
+        { error: "Missing scheduledFor" },
+        { status: 400 }
+      );
+    }
+    const when = new Date(iso);
+    if (isNaN(when.getTime())) {
+      return NextResponse.json({ error: "Invalid date" }, { status: 400 });
+    }
+    if (when.getTime() < Date.now() - 60_000) {
+      return NextResponse.json(
+        { error: "Schedule must be in the future" },
+        { status: 400 }
+      );
+    }
+    const updated = await db.tweetDraft.update({
+      where: { id },
+      data: {
+        status: "APPROVED",
+        scheduledFor: when,
+      },
+    });
+    return NextResponse.json({ ok: true, draft: updated });
   }
 
   if (action === "approve") {

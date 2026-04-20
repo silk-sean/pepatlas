@@ -21,10 +21,15 @@ export default async function AdminTweetsPage() {
   });
   if (me?.role !== "ADMIN") redirect("/");
 
-  const [pending, recentlyPosted, rejected] = await Promise.all([
+  const [pending, scheduled, recentlyPosted, rejected] = await Promise.all([
     db.tweetDraft.findMany({
       where: { status: { in: ["PENDING", "FAILED"] } },
       orderBy: { generatedAt: "desc" },
+      take: 30,
+    }),
+    db.tweetDraft.findMany({
+      where: { status: "APPROVED", scheduledFor: { not: null } },
+      orderBy: { scheduledFor: "asc" },
       take: 30,
     }),
     db.tweetDraft.findMany({
@@ -71,6 +76,32 @@ export default async function AdminTweetsPage() {
           }))}
         />
       </section>
+
+      {scheduled.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-[#7B2FFF] mb-3">
+            Scheduled ({scheduled.length})
+          </h2>
+          <div className="space-y-2">
+            {scheduled.map((d) => (
+              <div
+                key={d.id}
+                className="rounded-lg border border-[#7B2FFF]/30 bg-[#7B2FFF]/5 p-3"
+              >
+                <p className="text-sm text-white leading-relaxed whitespace-pre-wrap">
+                  {d.body}
+                </p>
+                <p className="mt-2 text-xs text-[#7B2FFF]">
+                  Posts at{" "}
+                  {d.scheduledFor
+                    ? new Date(d.scheduledFor).toLocaleString()
+                    : "—"}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="mb-10">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-[#7B2FFF] mb-3">
@@ -122,8 +153,8 @@ export default async function AdminTweetsPage() {
           10.
         </p>
         <p className="mt-1">
-          Tweets post immediately when approved. No scheduling yet (coming).
-          Draft generator uses rule-based templates; AI-written candidates come
+          Daily draft generation + hourly scheduled-post cron run on the
+          droplet. Approve + Post to fire immediately, or Schedule to queue for
           later.
         </p>
       </div>

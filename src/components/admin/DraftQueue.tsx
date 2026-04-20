@@ -11,6 +11,16 @@ interface DraftItem {
   generatedAt: string;
   status: string;
   errorMessage: string;
+  scheduledFor?: string | null;
+}
+
+/** Return a value suitable for <input type="datetime-local"> default. */
+function defaultScheduleValue(): string {
+  const d = new Date(Date.now() + 60 * 60 * 1000); // +1h
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(
+    d.getDate()
+  )}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 export function DraftQueue({ drafts }: { drafts: DraftItem[] }) {
@@ -118,8 +128,12 @@ function DraftCard({ draft }: { draft: DraftItem }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [body, setBody] = useState(draft.body);
-  const [busy, setBusy] = useState<null | "approve" | "reject" | "save">(null);
+  const [busy, setBusy] = useState<
+    null | "approve" | "reject" | "save" | "schedule"
+  >(null);
   const [error, setError] = useState<string | null>(null);
+  const [scheduling, setScheduling] = useState(false);
+  const [scheduleAt, setScheduleAt] = useState(defaultScheduleValue);
 
   const chars = body.length;
   const over = chars > 280;
@@ -141,6 +155,28 @@ function DraftCard({ draft }: { draft: DraftItem }) {
         setError(data.error || "Failed");
         return;
       }
+      router.refresh();
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function onSchedule() {
+    setError(null);
+    setBusy("schedule");
+    try {
+      const iso = new Date(scheduleAt).toISOString();
+      const res = await fetch(`/api/admin/tweets/drafts/${draft.id}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "schedule", scheduledFor: iso }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || "Failed");
+        return;
+      }
+      setScheduling(false);
       router.refresh();
     } finally {
       setBusy(null);
@@ -205,6 +241,33 @@ function DraftCard({ draft }: { draft: DraftItem }) {
         <p className="mt-2 text-xs text-red-400">Last error: {draft.errorMessage}</p>
       )}
 
+      {draft.status === "APPROVED" && draft.scheduledFor && (
+        <p className="mt-2 text-xs text-[#7B2FFF]">
+          Scheduled for {new Date(draft.scheduledFor).toLocaleString()}
+        </p>
+      )}
+
+      {scheduling && (
+        <div className="mt-3 flex items-center gap-2 flex-wrap rounded-lg border border-[#333] bg-[#0a0a0a] p-2.5">
+          <label className="text-[10px] uppercase tracking-wider text-[#9E9EAF]">
+            Post at
+          </label>
+          <input
+            type="datetime-local"
+            value={scheduleAt}
+            onChange={(e) => setScheduleAt(e.target.value)}
+            className="rounded border border-[#333] bg-[#111] px-2 py-1 text-xs text-white focus:border-[#7B2FFF] focus:outline-none"
+          />
+          <button
+            onClick={onSchedule}
+            disabled={busy !== null || !scheduleAt}
+            className="rounded bg-[#7B2FFF] px-3 py-1 text-xs font-semibold text-white hover:bg-[#6a24e0] disabled:opacity-50"
+          >
+            {busy === "schedule" ? "…" : "Confirm schedule"}
+          </button>
+        </div>
+      )}
+
       <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
         <span
           className={`text-[11px] font-mono ${
@@ -249,6 +312,13 @@ function DraftCard({ draft }: { draft: DraftItem }) {
                 className="rounded border border-[#333] px-2.5 py-1 text-xs text-[#666] hover:bg-[#1a1a1a] disabled:opacity-50"
               >
                 {busy === "reject" ? "…" : "Reject"}
+              </button>
+              <button
+                onClick={() => setScheduling((s) => !s)}
+                disabled={busy !== null}
+                className="rounded border border-[#333] px-2.5 py-1 text-xs text-[#C5C5D4] hover:bg-[#1a1a1a] disabled:opacity-50"
+              >
+                {scheduling ? "Cancel" : "Schedule"}
               </button>
               <button
                 onClick={() => call("approve")}

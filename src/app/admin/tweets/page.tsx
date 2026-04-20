@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { TweetComposer } from "@/components/admin/TweetComposer";
+import { DraftQueue } from "@/components/admin/DraftQueue";
 
 export const dynamic = "force-dynamic";
 
@@ -20,8 +21,22 @@ export default async function AdminTweetsPage() {
   });
   if (me?.role !== "ADMIN") redirect("/");
 
+  const [pending, recentlyPosted, rejected] = await Promise.all([
+    db.tweetDraft.findMany({
+      where: { status: { in: ["PENDING", "FAILED"] } },
+      orderBy: { generatedAt: "desc" },
+      take: 30,
+    }),
+    db.tweetDraft.findMany({
+      where: { status: "POSTED" },
+      orderBy: { postedAt: "desc" },
+      take: 10,
+    }),
+    db.tweetDraft.count({ where: { status: "REJECTED" } }),
+  ]);
+
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <header className="mb-6">
         <nav className="text-sm text-[#9E9EAF] mb-3">
           <Link href="/admin" className="hover:text-white transition-colors">
@@ -30,21 +45,86 @@ export default async function AdminTweetsPage() {
           {" / Tweets"}
         </nav>
         <h1 className="text-3xl font-bold text-white tracking-tight">
-          Post to @pepatlas
+          @pepatlas
         </h1>
         <p className="mt-2 text-[#9E9EAF]">
-          Compose a tweet. Review it. Hit post. Live on X immediately.
+          Draft queue + manual composer. Drafts are generated from forum + article activity.
+          Approve to post, reject to skip.
         </p>
       </header>
 
-      <TweetComposer />
+      <section className="mb-10">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-[#FF2D78]">
+            Draft Queue ({pending.length})
+          </h2>
+        </div>
+        <DraftQueue
+          drafts={pending.map((d) => ({
+            id: d.id,
+            body: d.body,
+            sourceType: d.sourceType ?? "",
+            sourceId: d.sourceId ?? "",
+            generatedAt: d.generatedAt.toISOString(),
+            status: d.status,
+            errorMessage: d.errorMessage ?? "",
+          }))}
+        />
+      </section>
 
-      <div className="mt-10 rounded-xl border border-[#333] bg-[#111] p-4 text-xs text-[#9E9EAF] leading-relaxed">
-        <p className="text-[#C5C5D4] font-semibold mb-1">Next phase (coming soon)</p>
+      <section className="mb-10">
+        <h2 className="text-sm font-semibold uppercase tracking-wider text-[#7B2FFF] mb-3">
+          Manual Compose
+        </h2>
+        <TweetComposer />
+      </section>
+
+      {recentlyPosted.length > 0 && (
+        <section className="mb-8">
+          <h2 className="text-sm font-semibold uppercase tracking-wider text-[#d6ff00] mb-3">
+            Recently Posted ({recentlyPosted.length})
+          </h2>
+          <div className="space-y-2">
+            {recentlyPosted.map((d) => (
+              <div
+                key={d.id}
+                className="rounded-lg border border-[#333] bg-[#111] p-3"
+              >
+                <p className="text-sm text-white leading-relaxed whitespace-pre-wrap">
+                  {d.body}
+                </p>
+                <div className="mt-2 text-xs text-[#666] flex items-center gap-3 flex-wrap">
+                  <span>
+                    Posted{" "}
+                    {d.postedAt ? new Date(d.postedAt).toLocaleString() : "—"}
+                  </span>
+                  {d.tweetUrl && (
+                    <a
+                      href={d.tweetUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#1DA1F2] hover:underline"
+                    >
+                      View on X ↗
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <div className="rounded-xl border border-[#333] bg-[#0f0f0f] p-4 text-xs text-[#666] leading-relaxed">
         <p>
-          AI-drafted tweet queue pulling from PepAtlas forum activity + articles,
-          with an approval inbox so you just click ✅ on 2-3 candidates per day.
-          For now, compose manually here.
+          <strong className="text-[#9E9EAF]">Queue stats:</strong>{" "}
+          {rejected} rejected all-time · {recentlyPosted.length} posted in last
+          10.
+        </p>
+        <p className="mt-1">
+          Tweets post immediately when approved. No scheduling yet (coming).
+          Draft generator uses rule-based templates; AI-written candidates come
+          later.
         </p>
       </div>
     </div>

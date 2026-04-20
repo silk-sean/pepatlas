@@ -330,6 +330,44 @@ model Bookmark {
   @@index([userId])
 }
 
+// === TWEET DRAFTING + SCHEDULING (@pepatlas automation) ===
+enum TweetStatus {
+  PENDING    // generated, awaiting admin approval
+  APPROVED   // approved but not yet posted (scheduled)
+  POSTED     // successfully posted to X
+  REJECTED   // admin rejected; skip
+  FAILED     // tried to post but X API errored
+}
+
+model TweetDraft {
+  id           String      @id @default(cuid())
+  body         String      @db.Text
+  status       TweetStatus @default(PENDING)
+  sourceType   String?     // "thread" | "article" | "stat" | "manual"
+  sourceId     String?     // threadId / article slug / etc
+  generatedAt  DateTime    @default(now())
+  postedAt     DateTime?
+  scheduledFor DateTime?
+  tweetId      String?     // X's tweet ID if posted
+  tweetUrl     String?
+  errorMessage String?
+
+  @@index([status, generatedAt(sort: Desc)])
+}
+
+// === NEWSLETTER SUBSCRIBERS ===
+model NewsletterSubscriber {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  createdAt      DateTime  @default(now())
+  verifiedAt     DateTime?
+  unsubscribedAt DateTime?
+  verifyToken    String    @unique
+  source         String?   // "footer" | "thread" | "article" | etc
+
+  @@index([verifiedAt])
+}
+
 // === ARTICLES ===
 model Article {
   id          String    @id @default(cuid())

@@ -5,6 +5,11 @@ services:
       dockerfile: Dockerfile
     container_name: pepatlas-app
     restart: unless-stopped
+    # Pull everything else (RESEND_API_KEY, X_*, ANTHROPIC_API_KEY, NEXT_PUBLIC_GA_*,
+    # EMAIL_FROM, etc) from .env via env_file. Explicit env entries below override
+    # env_file values, which is what we want for the constructed DATABASE_URL.
+    env_file:
+      - .env
     environment:
       NODE_ENV: production
       DATABASE_URL: postgresql://${POSTGRES_USER:-pepatlas}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-pepatlas}?schema=public

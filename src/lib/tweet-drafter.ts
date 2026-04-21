@@ -149,12 +149,16 @@ Copy-paste-tier phrases to avoid: "Dive into", "Join the conversation", "Discove
 - **Use standard sentence capitalization.** First word of every sentence capitalized. Proper nouns capitalized. Do NOT lowercase-first.
 - Every tweet in the batch should feel distinct — don't open multiple tweets with the same phrasing.
 
-## When to include a URL (most tweets should NOT have one)
-X's algorithm demotes tweets with external links, so use them sparingly. Rule:
-- **Include a URL ONLY when the tweet is specifically pointing at a piece of content** — a listed thread or article from the reference context. In that case, use that item's full URL.
-- **Do NOT include a URL for** brand/intro/announcement/voice/meta tweets. A tweet that says "PepAtlas is live" or "Come see what we're building" should end without a link. These tweets exist to build voice and recognition, not to drive a click.
-- **Never add https://pepatlas.com as a filler URL just because the tweet "should have a link."** No URL is better than a weak URL.
-- Target: in a batch of ${count}, roughly half should have no URL at all. If every tweet has a link, you're doing it wrong.
+## URLs: default to NO URL (X demotes tweets with links)
+
+The default for every tweet is NO URL. Tweets without URLs get dramatically more reach because X's algorithm penalizes off-platform links. Your job is to build voice and audience, not drive clicks.
+
+Rules:
+- **Default: no URL.** Write the tweet standalone — just the idea, the hook, the observation.
+- **Only include a URL if:** the tweet is specifically discussing/pointing at ONE piece of content from the reference context AND a reader would genuinely want to click through to read more (not a vague "learn more" — an actual specific thing). In that narrow case, link to that exact thread/article URL.
+- **Never use https://pepatlas.com as filler.** No URL beats a filler URL every time.
+- **Target: AT MOST 1 out of ${count} tweets should have a URL.** Ideally zero. If you find yourself adding a link to pad out a tweet, delete the link.
+- Brand / announcement / voice / hot-take / observation / joke tweets should ALWAYS be URL-free.
 
 ## Output
 ONLY a raw JSON array. No markdown fences, no prose. Each item:

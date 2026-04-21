@@ -37,9 +37,15 @@ export async function POST(req: NextRequest) {
     Math.min(168, Number(body?.windowHours ?? 12))
   );
 
-  const start = body?.startAt ? new Date(body.startAt) : new Date();
+  let start = body?.startAt ? new Date(body.startAt) : new Date();
   if (isNaN(start.getTime())) {
     return NextResponse.json({ error: "Invalid startAt" }, { status: 400 });
+  }
+  // Clamp start to now+1min if the user picked a time in the past.
+  // (Avoids the "I scheduled 6 tweets to fire all at once in the past" trap.)
+  const earliest = new Date(Date.now() + 60 * 1000);
+  if (start.getTime() < earliest.getTime()) {
+    start = earliest;
   }
 
   // Grab oldest-first so your oldest-waiting candidates get sent first.

@@ -389,31 +389,92 @@ export async function freshenForum(opts: {
     }
   }
 
-  // 2. Pick existing threads across categories, spread by last activity.
-  const candidateThreads = await db.thread.findMany({
-    orderBy: { lastReplyAt: "asc" }, // start with staler ones
-    take: threadsToTouch * 2,
-    select: {
-      id: true,
-      title: true,
-      body: true,
-      authorId: true,
-      categoryId: true,
-      replies: {
-        orderBy: { createdAt: "desc" },
-        take: 5,
-        select: {
-          id: true,
-          body: true,
-          authorId: true,
-          author: { select: { username: true } },
+  // 2. Category-balanced pick: guarantee at least one stale thread per
+  //    category, then fill remaining quota by overall staleness.
+  //    Global "oldest N" misses categories whose threads happen to be
+  //    younger than the N-th oldest thread overall.
+  const categories = await db.forumCategory.findMany({ select: { id: true } });
+
+  const perCategoryPicks: Array<{
+    id: string;
+    title: string;
+    body: string;
+    authorId: string;
+    categoryId: string;
+    replies: {
+      id: string;
+      body: string;
+      authorId: string;
+      author: { username: string | null } | null;
+    }[];
+  }> = [];
+  const pickedIds = new Set<string>();
+  const perCategoryQuota = Math.max(
+    1,
+    Math.floor(threadsToTouch / categories.length)
+  );
+
+  for (const cat of categories) {
+    const catThreads = await db.thread.findMany({
+      where: { categoryId: cat.id },
+      orderBy: { lastReplyAt: "asc" },
+      take: perCategoryQuota,
+      select: {
+        id: true,
+        title: true,
+        body: true,
+        authorId: true,
+        categoryId: true,
+        replies: {
+          orderBy: { createdAt: "desc" },
+          take: 5,
+          select: {
+            id: true,
+            body: true,
+            authorId: true,
+            author: { select: { username: true } },
+          },
         },
       },
-    },
-  });
+    });
+    for (const t of catThreads) {
+      if (!pickedIds.has(t.id)) {
+        perCategoryPicks.push(t);
+        pickedIds.add(t.id);
+      }
+    }
+  }
 
-  // Shuffle and take target count
-  const shuffled = candidateThreads.sort(() => Math.random() - 0.5).slice(0, threadsToTouch);
+  // Fill remaining quota from globally-stalest threads not already picked.
+  const extraNeeded = Math.max(0, threadsToTouch - perCategoryPicks.length);
+  const extras = extraNeeded
+    ? await db.thread.findMany({
+        where: { id: { notIn: Array.from(pickedIds) } },
+        orderBy: { lastReplyAt: "asc" },
+        take: extraNeeded,
+        select: {
+          id: true,
+          title: true,
+          body: true,
+          authorId: true,
+          categoryId: true,
+          replies: {
+            orderBy: { createdAt: "desc" },
+            take: 5,
+            select: {
+              id: true,
+              body: true,
+              authorId: true,
+              author: { select: { username: true } },
+            },
+          },
+        },
+      })
+    : [];
+
+  const shuffled = [...perCategoryPicks, ...extras]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, threadsToTouch);
 
   for (const thread of shuffled) {
     try {

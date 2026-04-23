@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import type { Prisma } from "@prisma/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserRoleActions } from "@/components/admin/UserRoleActions";
+import { LocalTime } from "@/components/admin/LocalTime";
 
 export const dynamic = "force-dynamic";
 
@@ -144,7 +145,7 @@ export default async function AdminUsersPage({ searchParams }: UsersPageProps) {
                     {u.postCount}
                   </td>
                   <td className="py-3 px-4 text-xs text-[#9E9EAF]">
-                    {new Date(u.createdAt).toLocaleDateString()}
+                    <LocalTime iso={u.createdAt.toISOString()} mode="date" />
                   </td>
                   <td className="py-3 px-4 text-right">
                     <UserRoleActions

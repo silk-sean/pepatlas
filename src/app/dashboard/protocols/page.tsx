@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProtocolEditor } from "@/components/dashboard/ProtocolEditor";
+import { LocalTime } from "@/components/admin/LocalTime";
 
 export const dynamic = "force-dynamic";
 
@@ -89,7 +90,7 @@ export default async function ProtocolsPage() {
                       </p>
                     )}
                     <p className="text-xs text-[#666] mt-2">
-                      Saved {new Date(p.createdAt).toLocaleDateString()}
+                      Saved <LocalTime iso={p.createdAt.toISOString()} mode="date" />
                     </p>
                   </CardContent>
                 </Card>

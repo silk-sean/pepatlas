@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { Card, CardContent } from "@/components/ui/card";
 import { ReportActions } from "@/components/admin/ReportActions";
+import { LocalTime } from "@/components/admin/LocalTime";
 
 export const dynamic = "force-dynamic";
 
@@ -134,7 +135,7 @@ export default async function AdminReportsPage({ searchParams }: ReportsPageProp
                           @{r.reporter?.username ?? "?"}
                         </span>
                         {" · "}
-                        {new Date(r.createdAt).toLocaleString()}
+                        <LocalTime iso={r.createdAt.toISOString()} />
                       </div>
                       <Link
                         href={linkHref}

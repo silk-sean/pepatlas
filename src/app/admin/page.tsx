@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LocalTime } from "@/components/admin/LocalTime";
 
 export const dynamic = "force-dynamic";
 
@@ -147,7 +148,7 @@ export default async function AdminPage() {
                   {u.postCount} posts
                   <br />
                   <span className="text-[#666]">
-                    {new Date(u.createdAt).toLocaleDateString()}
+                    <LocalTime iso={u.createdAt.toISOString()} mode="date" />
                   </span>
                 </div>
               </div>

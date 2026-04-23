@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { SITE_URL } from "@/lib/constants";
 import { sendMail, replyNotificationEmail } from "@/lib/email";
+import { queueGhostReplies, userIsGhost } from "@/lib/ghost-engagement";
 
 interface Params {
   params: Promise<{ threadId: string }>;
@@ -77,6 +78,22 @@ export async function POST(req: Request, ctx: Params) {
     replyBody: bodyText,
     replierUserId: session.user.id,
   }).catch((e) => console.error("[notify] failed:", e));
+
+  // Fire-and-forget: if a real user replied, queue 1-2 ghost counter-replies.
+  // Fewer jobs than thread-level triggers (counter-replies should feel proportional).
+  userIsGhost(session.user.id).then((ghost) => {
+    if (!ghost) {
+      queueGhostReplies({
+        kind: "REPLY_TO_REPLY",
+        threadId,
+        parentReplyId: reply.id,
+        countMin: 1,
+        countMax: 2,
+        minDelayMin: 10,
+        maxDelayMin: 240, // 4h max
+      }).catch((e) => console.error("[ghost-engagement] queue failed:", e));
+    }
+  });
 
   return NextResponse.json({ ok: true, reply });
 }

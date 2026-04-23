@@ -82,6 +82,12 @@ export default async function AdminPage() {
       accent: "#1DA1F2",
       href: "/admin/tweets",
     },
+    {
+      label: "Forum Engage",
+      value: "→",
+      accent: "#7B2FFF",
+      href: "/admin/forum",
+    },
   ];
 
   return (

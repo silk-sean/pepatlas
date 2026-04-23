@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import slugify from "slugify";
 import { auth } from "@/auth";
 import { db } from "@/lib/db";
+import { queueGhostReplies, userIsGhost } from "@/lib/ghost-engagement";
 
 // POST /api/forum/threads — create a new thread
 export async function POST(req: Request) {
@@ -102,6 +103,17 @@ export async function POST(req: Request) {
       data: { postCount: { increment: 1 } },
     }),
   ]);
+
+  // Fire-and-forget: if a real user posted, queue ghost replies to simulate
+  // organic engagement. Ghost users don't trigger this (prevents self-chains).
+  userIsGhost(session.user.id).then((ghost) => {
+    if (!ghost) {
+      queueGhostReplies({
+        kind: "REPLY_TO_THREAD",
+        threadId: thread.id,
+      }).catch((e) => console.error("[ghost-engagement] queue failed:", e));
+    }
+  });
 
   return NextResponse.json({ ok: true, thread, category: category.slug });
 }

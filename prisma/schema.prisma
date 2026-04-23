@@ -368,6 +368,37 @@ model NewsletterSubscriber {
   @@index([verifiedAt])
 }
 
+// === GHOST ENGAGEMENT ===
+// Background jobs that generate AI replies from ghost users. Queued when
+// a real user posts a thread or reply; processed by a cron to simulate
+// natural community engagement. Admin can trigger freshening manually too.
+enum GhostJobStatus {
+  PENDING
+  DONE
+  FAILED
+}
+
+enum GhostJobKind {
+  REPLY_TO_THREAD // post top-level reply on a thread
+  REPLY_TO_REPLY  // post a child reply to an existing reply
+}
+
+model GhostReplyJob {
+  id           String         @id @default(cuid())
+  kind         GhostJobKind
+  threadId     String
+  parentReplyId String?       // set when kind=REPLY_TO_REPLY
+  scheduledFor DateTime
+  status       GhostJobStatus @default(PENDING)
+  resultReplyId String?       // the Reply.id once posted
+  errorMessage String?
+  createdAt    DateTime       @default(now())
+  completedAt  DateTime?
+
+  @@index([status, scheduledFor])
+  @@index([threadId])
+}
+
 // === ARTICLES ===
 model Article {
   id          String    @id @default(cuid())

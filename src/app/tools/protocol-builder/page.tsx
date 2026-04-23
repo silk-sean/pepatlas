@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { ProtocolBuilder } from "@/components/tools/ProtocolBuilder";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Peptide Protocol Builder",
   description:
     "Build a personalized peptide protocol based on your research goals, experience level, and budget. Free tool with compound suggestions and weekly schedules.",
+  alternates: { canonical: `${SITE_URL}/tools/protocol-builder` },
 };
 
 export default function ProtocolBuilderPage() {

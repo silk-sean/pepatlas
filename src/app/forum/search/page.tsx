@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Search — Forum",
+  robots: { index: false, follow: true },
 };
 
 interface ThreadHit {

@@ -6,12 +6,13 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { pepcalcUrl } from "@/lib/constants";
+import { pepcalcUrl, SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Free Peptide Tools",
   description:
     "Free peptide research tools: Peppercalc dose calculator, protocol builder, cost calculator, and cycle planner.",
+  alternates: { canonical: `${SITE_URL}/tools` },
 };
 
 const TOOLS = [

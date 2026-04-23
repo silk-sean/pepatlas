@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { DoseCalculator } from "@/components/tools/DoseCalculator";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Peptide Dose Calculator",
   description:
     "Free peptide dose calculator. Calculate exact injection volumes based on vial size, bacteriostatic water, and desired dose in mcg. Supports BPC-157, TB-500, Ipamorelin, and more.",
+  alternates: { canonical: `${SITE_URL}/tools/dose-calculator` },
 };
 
 export default function DoseCalculatorPage() {

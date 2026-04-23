@@ -6,11 +6,13 @@ import {
   CATEGORY_META,
   type ArticleCategory,
 } from "@/lib/articles";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Articles — Peptide Research & Education",
   description:
     "Deep-dives on peptide compounds, protocols, stacks, dosing frameworks, and recovery strategies.",
+  alternates: { canonical: `${SITE_URL}/articles` },
 };
 
 interface ArticlesPageProps {

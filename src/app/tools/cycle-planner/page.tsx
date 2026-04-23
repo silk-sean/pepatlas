@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Cycle Planner — Coming Soon",
   description: "Plan multi-week peptide cycles with loading, maintenance, and PCT phases.",
+  alternates: { canonical: `${SITE_URL}/tools/cycle-planner` },
 };
 
 export default function CyclePlannerPage() {

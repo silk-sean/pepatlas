@@ -5,6 +5,7 @@ import { SITE_NAME } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Newsletter",
+  robots: { index: false, follow: false },
 };
 
 interface Props {

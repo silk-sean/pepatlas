@@ -6,7 +6,10 @@ import { auth } from "@/auth";
 import { NewThreadForm } from "@/components/forum/NewThreadForm";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const metadata: Metadata = { title: "New Thread" };
+export const metadata: Metadata = {
+  title: "New Thread",
+  robots: { index: false, follow: false },
+};
 
 export default async function NewThreadPage() {
   const session = await auth();

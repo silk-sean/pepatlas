@@ -21,10 +21,20 @@ interface ThreadPageProps {
 }
 
 export async function generateMetadata({ params }: ThreadPageProps): Promise<Metadata> {
-  const { threadId } = await params;
-  const thread = await db.thread.findUnique({ where: { id: threadId } });
+  const { category, threadId } = await params;
+  const thread = await db.thread.findUnique({
+    where: { id: threadId },
+    select: { title: true, body: true },
+  });
   if (!thread) return {};
-  return { title: thread.title };
+  const description = thread.body.replace(/\s+/g, " ").trim().slice(0, 160);
+  const canonical = `${SITE_URL}/forum/${category}/${threadId}`;
+  return {
+    title: thread.title,
+    description,
+    alternates: { canonical },
+    openGraph: { title: thread.title, description, url: canonical },
+  };
 }
 
 export default async function ThreadDetailPage({ params }: ThreadPageProps) {

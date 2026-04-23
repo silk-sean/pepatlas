@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { PartnerSidebar } from "@/components/shared/PartnerSidebar";
 import { ForumSearchBar } from "@/components/forum/ForumSearchBar";
 import { db } from "@/lib/db";
+import { SITE_URL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
   title: "Forums — Peptide Community",
   description:
     "Join the peptide community. Discuss protocols, share experiences, ask questions, and track your research journey.",
+  alternates: { canonical: `${SITE_URL}/forum` },
 };
 
 export default async function ForumPage() {

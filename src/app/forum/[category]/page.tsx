@@ -20,12 +20,14 @@ export async function generateMetadata({
   const { category } = await params;
   const cat = await db.forumCategory.findUnique({ where: { slug: category } });
   if (!cat) return {};
+  const canonical = `${SITE_URL}/forum/${category}`;
   return {
     title: `${cat.name} — Forum`,
     description: cat.description,
+    alternates: { canonical },
     openGraph: {
       title: `${cat.name} — PepAtlas Forum`,
-      url: `${SITE_URL}/forum/${category}`,
+      url: canonical,
     },
   };
 }

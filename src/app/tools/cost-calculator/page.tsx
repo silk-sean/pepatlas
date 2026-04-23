@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { CostCalculator } from "@/components/tools/CostCalculator";
+import { SITE_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Peptide Cost Calculator",
   description:
     "Estimate the total cost of your peptide protocol. Add compounds, set dosing parameters, and get per-day, per-week, and total cost breakdowns.",
+  alternates: { canonical: `${SITE_URL}/tools/cost-calculator` },
 };
 
 export default function CostCalculatorPage() {
